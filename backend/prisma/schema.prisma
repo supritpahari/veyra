@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum SourceType {
+  synthetic
+  upload
+}
+
+model Report {
+  id           String        @id @db.Char(36)
+  title        String        @db.VarChar(160)
+  sourceType   SourceType    @default(synthetic) @map("source_type")
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamp(0)
+  measurements Measurement[]
+
+  @@map("reports")
+}
+
+model User {
+  id           String        @id @db.Char(36)
+  email        String        @unique(map: "users_email_key") @db.VarChar(254)
+  passwordHash String?       @map("password_hash") @db.VarChar(255)
+  googleSub    String?       @unique(map: "users_google_sub_key") @map("google_sub") @db.VarChar(255)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamp(0)
+  sessions     AuthSession[]
+
+  @@map("users")
+}
+
+model AuthSession {
+  id               String    @id @db.Char(36)
+  userId           String    @map("user_id") @db.Char(36)
+  refreshTokenHash String    @map("refresh_token_hash") @db.Char(64)
+  userAgent        String?   @map("user_agent") @db.VarChar(512)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  lastUsedAt       DateTime  @default(now()) @map("last_used_at") @db.Timestamp(0)
+  expiresAt        DateTime  @map("expires_at") @db.DateTime(0)
+  revokedAt        DateTime? @map("revoked_at") @db.DateTime(0)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade, map: "fk_auth_sessions_user")
+
+  @@index([userId, revokedAt], map: "idx_auth_sessions_user_revoked")
+  @@index([expiresAt], map: "idx_auth_sessions_expires")
+  @@map("auth_sessions")
+}
+
+model Measurement {
+  id                   String    @id @db.Char(36)
+  reportId             String    @map("report_id") @db.Char(36)
+  testName             String    @map("test_name") @db.VarChar(160)
+  normalizedName       String?   @map("normalized_name") @db.VarChar(160)
+  value                Decimal   @db.Decimal(14, 4)
+  unit                 String?   @db.VarChar(48)
+  referenceLow         Decimal?  @map("reference_low") @db.Decimal(14, 4)
+  referenceHigh        Decimal?  @map("reference_high") @db.Decimal(14, 4)
+  sourceText           String?   @map("source_text") @db.Text
+  extractionConfidence Decimal?  @map("extraction_confidence") @db.Decimal(5, 4)
+  collectedAt          DateTime? @map("collected_at") @db.Date
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  report               Report    @relation(fields: [reportId], references: [id], onDelete: Cascade, map: "fk_measurements_report")
+
+  @@index([reportId], map: "idx_measurements_report")
+  @@index([normalizedName], map: "idx_measurements_normalized_name")
+  @@map("measurements")
+}
