@@ -41,18 +41,6 @@ const DASHBOARD_NAV_ITEMS = [
     ),
   },
   {
-    path: '/dashboard/lab',
-    label: 'AI Lab',
-    sub: 'How the model learns (synthetic data)',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M10 2v7.31L4.2 18.5A2 2 0 0 0 5.86 21.5h12.28a2 2 0 0 0 1.66-3L14 9.31V2" />
-        <path d="M8.5 2h7" />
-        <path d="M14 9.3a6.5 6.5 0 1 1-4 0" />
-      </svg>
-    ),
-  },
-  {
     path: '/dashboard/evaluation',
     label: 'How Well It Works',
     sub: 'Accuracy & honest limits',

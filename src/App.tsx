@@ -5,7 +5,7 @@ import { Landing } from './components/vh-landing';
 import { DashboardLayout } from './components/DashboardLayout';
 import { Analyzer, DataQuality } from './components/vh-analyzer';
 import { PatternExplorer } from './components/vh-patterns';
-import { AILab, Evaluation } from './components/vh-lab';
+import { Evaluation } from './components/vh-lab';
 import { TweaksPanel } from './components/TweaksPanel';
 
 export default function App() {
@@ -25,7 +25,6 @@ export default function App() {
                 <Route path="analyzer" element={<Analyzer />} />
                 <Route path="patterns" element={<PatternExplorer />} />
                 <Route path="quality" element={<DataQuality />} />
-                <Route path="lab" element={<AILab />} />
                 <Route path="evaluation" element={<Evaluation />} />
               </Route>
 

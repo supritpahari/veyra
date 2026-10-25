@@ -221,7 +221,7 @@ export function Analyzer() {
               className="vh-btn vh-btn--ghost vh-btn--block"
               onClick={() => navigate('/dashboard/patterns')}
             >
-              See in Pattern Simulator →
+              See how findings connect →
             </button>
           </div>
         </aside>
