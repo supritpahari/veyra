@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { IntegrityIssue } from '../types';
 import { vhIntegrity, vhFmtRange } from '../data/vh-data';
 import { useVeyra } from '../context/VeyraContext';
 import { SynthBanner, PageHead, ReportPicker, FlagBadge, MeasurementReceipt, fmtVal } from './vh-ui';

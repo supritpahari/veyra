@@ -3,11 +3,9 @@ import type {
   Report,
   Analysis,
   TweaksState,
-  ApiReportListItem,
   ApiReportAnalysis,
   ApiSimulationResult,
   Measurement,
-  IntegrityIssue,
   FlagType,
 } from '../types';
 import { VH_REPORTS, vhAnalyze } from '../data/vh-data';

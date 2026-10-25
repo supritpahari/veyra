@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import type { Report, Analysis, Measurement, ApiSimulationResult, FlagType } from '../types';
+import type { Report, Analysis, ApiSimulationResult, FlagType } from '../types';
 import { VH_FLAG_META, vhFmtRange } from '../data/vh-data';
 import { useVeyra } from '../context/VeyraContext';
-import { SynthBanner, PageHead, ReportPicker, FlagBadge, KindTag, MeasurementReceipt, Eyebrow, fmtVal } from './vh-ui';
+import { SynthBanner, PageHead, ReportPicker, FlagBadge, MeasurementReceipt, Eyebrow } from './vh-ui';
 
 const VH_GW = 800,
   VH_GH = 520;
