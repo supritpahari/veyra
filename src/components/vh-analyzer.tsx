@@ -84,9 +84,9 @@ export function Analyzer() {
     <div className="vh-page">
       <SynthBanner />
       <PageHead
-        eyebrow="Dashboard · Report Analyzer"
-        title="Extracted measurements"
-        lede="Each value is compared with the reference interval printed on the report. Select a row to see its source text and evidence receipt."
+        eyebrow="Dashboard · Read Your Report"
+        title="Your report, read out"
+        lede="Every test with its value, unit, and reference range. Select any row to see the exact source line it came from."
         right={<ReportPicker reportId={reportId} setReportId={setReportId} />}
       />
 
@@ -254,9 +254,9 @@ export function DataQuality() {
     <div className="vh-page">
       <SynthBanner />
       <PageHead
-        eyebrow="Dashboard · Report Integrity Guardian"
-        title="Validate before you interpret"
-        lede="Checks run before any flag or relationship is computed. Veyra never fills in a missing unit or reference interval. Each issue is explained and held for a person to resolve."
+        eyebrow="Dashboard · Quality Check"
+        title="Checked before you see it"
+        lede="These checks run before any result is shown. If something is missing or unreadable, it is flagged for a person — never filled in automatically."
         right={<ReportPicker reportId={reportId} setReportId={setReportId} />}
       />
       <div className="vh-dq">

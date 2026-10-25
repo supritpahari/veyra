@@ -4,8 +4,8 @@ import { useVeyra } from '../context/VeyraContext';
 const DASHBOARD_NAV_ITEMS = [
   {
     path: '/dashboard/analyzer',
-    label: 'Report Analyzer',
-    sub: 'Extracted tests & values',
+    label: 'Read Your Report',
+    sub: 'Tests, values, healthy ranges',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -18,8 +18,8 @@ const DASHBOARD_NAV_ITEMS = [
   },
   {
     path: '/dashboard/patterns',
-    label: 'Pattern Explorer',
-    sub: 'Graph & live simulation API',
+    label: 'See Connections',
+    sub: 'How findings relate to each other',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <circle cx="18" cy="5" r="3" />
@@ -32,8 +32,8 @@ const DASHBOARD_NAV_ITEMS = [
   },
   {
     path: '/dashboard/quality',
-    label: 'Data Quality',
-    sub: 'Report integrity guardian',
+    label: 'Quality Check',
+    sub: 'What happens before results are shown',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -43,7 +43,7 @@ const DASHBOARD_NAV_ITEMS = [
   {
     path: '/dashboard/lab',
     label: 'AI Lab',
-    sub: 'Synthetic patient dataset lab',
+    sub: 'How the model learns (synthetic data)',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M10 2v7.31L4.2 18.5A2 2 0 0 0 5.86 21.5h12.28a2 2 0 0 0 1.66-3L14 9.31V2" />
@@ -54,8 +54,8 @@ const DASHBOARD_NAV_ITEMS = [
   },
   {
     path: '/dashboard/evaluation',
-    label: 'Evaluation & Evidence',
-    sub: 'Traceable receipts & metrics',
+    label: 'How Well It Works',
+    sub: 'Accuracy & honest limits',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
@@ -74,7 +74,7 @@ export function DashboardLayout() {
         <div className="vh-sidebar__top">
           <div className="vh-sidebar__header">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span className="vh-sidebar__badge">CLINICAL WORKSPACE</span>
+              <span className="vh-sidebar__badge">DEMO WORKSPACE</span>
               <span
                 style={{
                   display: 'inline-flex',
@@ -101,7 +101,7 @@ export function DashboardLayout() {
 
           {/* Active Case Selector Card */}
           <div className="vh-sidebar__case">
-            <div className="vh-sidebar__case-label">REPORTS IN DATABASE</div>
+            <div className="vh-sidebar__case-label">SAMPLE REPORTS</div>
             <div className="vh-sidebar__case-selector">
               {availableReports.map((r, i) => (
                 <button
@@ -148,10 +148,10 @@ export function DashboardLayout() {
         <div className="vh-sidebar__foot">
           <div className="vh-sidebar__engine">
             <span className="vh-sidebar__dot" />
-            <span>Deterministic Rules Engine</span>
+            <span>Fixed rules · fully reviewable</span>
           </div>
           <Link to="/" className="vh-sidebar__home-link">
-            ← Overview &amp; Hero Section
+            ← Back to the introduction
           </Link>
         </div>
       </aside>

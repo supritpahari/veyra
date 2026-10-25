@@ -100,9 +100,9 @@ export function AILab() {
         Experimental workspace. Nothing on this page is a real training run unless it is marked Ready.
       </SynthBanner>
       <PageHead
-        eyebrow="Dashboard · AI Lab · Synthetic Patient Laboratory"
-        title="Dataset to model, out in the open"
-        lede="Generate structured synthetic lab cases, validate them, split them with no leakage between train and held-out sets, and train with Adaption Labs. Every step shows its real status."
+        eyebrow="Dashboard · AI Lab"
+        title="How the AI learns — out in the open"
+        lede="Build a dataset, run training, and see the real status at every step. Everything here uses synthetic (fake) cases and clearly marked metrics."
       />
 
       <div className="vh-lab">
@@ -230,9 +230,9 @@ export function Evaluation() {
     <div className="vh-page">
       <SynthBanner />
       <PageHead
-        eyebrow="Dashboard · Evaluation & Evidence"
-        title="Measured honestly, with limits stated"
-        lede="The model is compared with a simple baseline on held-out synthetic cases. Until a run actually finishes, each metric shows its real status instead of a number."
+        eyebrow="Dashboard · How Well It Works"
+        title="How well it works — honestly"
+        lede="Accuracy measured against a simple baseline. Until a run finishes, each metric shows its real status instead of a number."
       />
 
       <div className="vh-eval">

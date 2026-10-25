@@ -170,9 +170,9 @@ export function PatternExplorer() {
     <div className="vh-page">
       <SynthBanner />
       <PageHead
-        eyebrow="Dashboard · Pattern Explorer"
-        title="Pattern Graph & Simulation"
-        lede="Explore extracted measurements and execute deterministic one-value comparisons against backend reference intervals."
+        eyebrow="Dashboard · See Connections"
+        title="How findings connect"
+        lede="What the values suggest together, joined by rules you can open and read. Suggestions from the model are labeled separately."
         right={<ReportPicker reportId={reportId} setReportId={setReportId} />}
       />
 

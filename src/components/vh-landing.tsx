@@ -21,7 +21,7 @@ export function HeroSpecimen() {
         <span>·</span>
         <span>{report.source}</span>
         <span className="vh-spec__live">
-          <i />Live specimen
+          <i />Sample report
         </span>
       </div>
       <div className="vh-spec__body">
@@ -44,13 +44,13 @@ export function HeroSpecimen() {
           </tbody>
         </table>
         <div className="vh-spec__rcpt">
-          <div className="vh-receipt__lbl">Evidence receipt</div>
+          <div className="vh-receipt__lbl">Where the value came from</div>
           <div className="vh-spec__name">{m.name}</div>
           <pre className="mono">{m.src || `${m.name}: ${m.value} ${m.unit || ''}`}</pre>
           <div className="vh-spec__kv">
-            <span>Reference</span>
+            <span>Healthy range</span>
             <b className="mono">{m.range ? vhFmtRange(m.range) : 'not on report'}</b>
-            <span>Flag source</span>
+            <span>Based on</span>
             <b>
               <KindTag kind={m.evidence?.method || 'deterministic'} />
             </b>
@@ -63,7 +63,7 @@ export function HeroSpecimen() {
         </div>
       </div>
       <button className="vh-spec__cta" onClick={() => navigate('/dashboard/analyzer')}>
-        Open in Dashboard Analyzer →
+        Open the full report →
       </button>
     </div>
   );
@@ -73,21 +73,16 @@ export function Landing() {
   const navigate = useNavigate();
 
   const steps = [
-    ['01', 'Extract', 'PDF or image in. Out come test names, values, units, dates, and reference ranges, with every value tied to its source line.'],
-    ['02', 'Validate', 'Before anything is interpreted, the Integrity Guardian checks for missing units, absent ranges, duplicate tests, and unreadable text.'],
-    ['03', 'Flag', 'Each result is compared with the reference interval printed on the report. These checks are rule-based, so the same input always gives the same flag.'],
-    ['04', 'Relate', 'The Hidden Pattern Graph links findings using configured rules. Model suggestions are labeled separately.'],
-    ['05', 'Inspect', 'Every output comes with a receipt: the measurement, unit, range, rule, and whether it came from rules or a model.'],
+    ['01', 'Upload a report', 'Pick a PDF or photo of a lab printout. A few synthetic samples are ready so you can try it right away.'],
+    ['02', 'Understand it', 'Every test is read out in plain language: the value, the healthy range, whether it is in range, and what it connects to.'],
+    ['03', 'Check it', 'Every claim shows the exact source line and rule behind it, so you can verify it against your own report.'],
   ];
 
   const caps: [string, string, string][] = [
-    ['/dashboard/analyzer', 'Report Analyzer', 'Structured extraction with per-value source text and extraction confidence.'],
-    ['/dashboard/patterns', 'Hidden Pattern Graph', 'Measurements as nodes and relationships as edges. Select an edge to see why it is there.'],
-    ['/dashboard/patterns', 'One-Value-Changed', 'Change one synthetic value and see exactly which flags and edges change.'],
-    ['/dashboard/evaluation', 'Evidence Receipts', 'Every claim points back to a measurement, rule, or source, or is marked unverified.'],
-    ['/dashboard/lab', 'Synthetic Patient Lab', 'Generate synthetic cases, keep held-out splits free of leakage, and track training runs.'],
-    ['/dashboard/quality', 'Uncertainty Engine', 'The system abstains when information is missing. It uses qualitative labels until confidence is calibrated.'],
-    ['/dashboard/quality', 'Integrity Guardian', 'Explains each data-quality issue and suggests a fix. It never fills in a missing unit or range.'],
+    ['/dashboard/analyzer', 'Read your report', 'Every test with its value, unit, and healthy range — and the exact source line it came from.'],
+    ['/dashboard/patterns', 'See how findings connect', 'A graph shows what relates to what, and why the link exists.'],
+    ['/dashboard/quality', 'Check report quality', 'Missing or unreadable values are flagged for review, never filled in by the system.'],
+    ['/dashboard/evaluation', 'See how well it works', 'The system measures its own accuracy and shows its limits honestly.'],
   ];
 
   return (
@@ -95,30 +90,27 @@ export function Landing() {
       {/* Hero Section */}
       <section className="vh-hero">
         <div className="vh-hero__l">
-          <Eyebrow>Evidence-first lab report analysis · Hackathon prototype</Eyebrow>
+          <Eyebrow>Understand your lab report — clearly and safely</Eyebrow>
           <h1 className="vh-display">
             Medical insights<br />
             you can <em>inspect.</em>
           </h1>
           <p className="vh-hero__lede">
-            Veyra Health turns raw lab reports into structured, explainable findings, each with a receipt. You see what was flagged, the exact measurement, unit, range, and rule behind it, and how sure the system is.
+            Veyra reads your lab report and explains it in plain language: what is in range, what is out of range, what the results suggest together — and every answer comes with the exact source line you can check yourself.
           </p>
           <div className="vh-hero__ctas">
             <button
               className="vh-btn vh-btn--primary"
               onClick={() => navigate('/dashboard/analyzer')}
             >
-              Launch Dashboard
+              Open the demo
             </button>
-            <button
-              className="vh-btn vh-btn--ghost"
-              onClick={() => navigate('/dashboard/patterns')}
-            >
-              Explore Pattern Graph
-            </button>
+            <a className="vh-btn vh-btn--ghost" href="#how">
+              How it works ↓
+            </a>
           </div>
           <div className="vh-hero__fine">
-            Synthetic data only. Not a diagnostic system. Built to support review by qualified healthcare professionals.
+            Prototype with synthetic data only. Not a diagnostic system — built to support review by qualified healthcare professionals.
           </div>
         </div>
         <div className="vh-hero__r">
@@ -126,19 +118,22 @@ export function Landing() {
         </div>
       </section>
 
-      {/* The Problem Section */}
+      {/* Why this exists */}
       <section className="vh-sec">
         <div className="vh-sec__head">
-          <Eyebrow>The problem</Eyebrow>
+          <Eyebrow>Why Veyra exists</Eyebrow>
           <h2 className="vh-h2">
-            A lab report can list dozens of measurements, and a single flag on one value says nothing about how it relates to the others.
+            Lab reports are written for lab systems, not for people.
           </h2>
+          <p className="vh-lede">
+            You get numbers and abbreviations, and the meaning arrives later — from a person. Veyra bridges that gap: it reads the report, suggests what the values mean together, and shows the exact evidence for every claim so you can check its work.
+          </p>
         </div>
         <div className="vh-trio">
           {[
-            ['observed', 'Observed', 'Information extracted directly from the report. Every value links back to its line of source text.'],
-            ['associated', 'Associated', 'Findings connected by a configured, reviewable rule. The rule ID and its condition are always visible.'],
-            ['inferred', 'Inferred', 'Patterns suggested by a model or heuristic. They are labeled with their limitations and never presented as a diagnosis or a cause.'],
+            ['observed', 'Straight from the report', 'Extracted directly from your file. Every value keeps the source text it came from.'],
+            ['associated', 'Joined by a rule', 'What tends to appear together is linked by a rule you can open and read.'],
+            ['inferred', 'A suggestion, clearly labeled', 'Patterns the model proposes are marked as suggestions — never diagnoses, never causes.'],
           ].map(([k, , d]) => (
             <div key={k} className={`vh-trio__c vh-trio__c--${k}`}>
               <svg viewBox="0 0 120 40" className="vh-trio__edge" aria-hidden="true">
@@ -161,11 +156,11 @@ export function Landing() {
         </div>
       </section>
 
-      {/* Workflow Section */}
-      <section className="vh-sec vh-sec--flow">
+      {/* How it works */}
+      <section className="vh-sec vh-sec--flow" id="how">
         <div className="vh-sec__head">
-          <Eyebrow>Workflow</Eyebrow>
-          <h2 className="vh-h2">From PDF to inspectable findings in five steps.</h2>
+          <Eyebrow>How it works</Eyebrow>
+          <h2 className="vh-h2">From a lab report to something you can actually read — in three steps.</h2>
         </div>
         <ol className="vh-flow">
           {steps.map(([n, t, d]) => (
@@ -182,8 +177,8 @@ export function Landing() {
       <section className="vh-sec">
         <div className="vh-sec__head vh-sec__head--row">
           <div>
-            <Eyebrow>Dashboard Capabilities</Eyebrow>
-            <h2 className="vh-h2">Interactive tools available in the workspace.</h2>
+            <Eyebrow>Inside the demo</Eyebrow>
+            <h2 className="vh-h2">Four things you can look at.</h2>
           </div>
         </div>
         <div className="vh-caps">
@@ -192,14 +187,9 @@ export function Landing() {
               <span className="mono vh-cap__n">{String(i + 1).padStart(2, '0')}</span>
               <h3>{t}</h3>
               <p>{d}</p>
-              <span className="vh-cap__go">Open in Dashboard →</span>
+              <span className="vh-cap__go">Open →</span>
             </button>
           ))}
-          <div className="vh-cap vh-cap--img">
-            <div className="vh-ph">
-              <span className="mono">evidence graph · interactive diagnostic trace</span>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -211,16 +201,16 @@ export function Landing() {
         </div>
         <ul className="vh-honest__list">
           <li>
-            <b>No diagnosis.</b> Associations are never presented as diagnoses or causes.
+            <b>No diagnosis.</b> It explains findings in context; only a clinician makes decisions.
           </li>
           <li>
-            <b>No guessed units or ranges.</b> If a unit or range is missing, the result is held for verification.
+            <b>No guessing.</b> If a unit or range is missing, the result waits for a person — it is never auto-filled.
           </li>
           <li>
-            <b>No fabricated metrics.</b> Training runs and metrics that haven't happened are shown as pending.
+            <b>No fake numbers.</b> Metrics that have not been measured yet are shown as pending.
           </li>
           <li>
-            <b>No false precision.</b> Confidence is shown as a number only once it's calibrated. Until then you see qualitative labels.
+            <b>No forced precision.</b> Confidence is shown in words until it can be shown as a real number.
           </li>
           <li>
             <b>No real patients.</b> The demo uses only synthetic, clearly labeled cases.
@@ -231,15 +221,15 @@ export function Landing() {
       {/* CTA Section */}
       <section className="vh-cta">
         <div>
-          <h2 className="vh-h2">Inspect a synthetic report.</h2>
-          <p style={{ margin: '8px 0 0', opacity: 0.85 }}>Access the full clinical inspection suite in the dashboard.</p>
+          <h2 className="vh-h2">Try it with a sample report.</h2>
+          <p style={{ margin: '8px 0 0', opacity: 0.85 }}>No sign-up and no real patient data — synthetic cases only.</p>
         </div>
         <div className="vh-hero__ctas">
           <button className="vh-btn vh-btn--onDark" onClick={() => navigate('/dashboard/analyzer')}>
-            Open Dashboard
+            Open the dashboard
           </button>
           <button className="vh-btn vh-btn--ghostDark" onClick={() => navigate('/dashboard/evaluation')}>
-            See Evaluation &amp; Limits
+            See how it proves its claims
           </button>
         </div>
       </section>
