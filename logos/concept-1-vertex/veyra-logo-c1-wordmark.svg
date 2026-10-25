@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" role="img" aria-labelledby="t d">
+  <title id="t">Veyra wordmark</title>
+  <desc id="d">Typography-only lockup: Veyra in semibold navy with a teal data-point dot as the terminal.</desc>
+  <text x="2" y="46" font-family="'IBM Plex Sans','Geist',system-ui,-apple-system,'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="44" font-weight="600" letter-spacing="-0.9" fill="#102A43">Veyra</text>
+  <circle cx="121" cy="41.5" r="4.4" fill="#0E7490"/>
+</svg>
