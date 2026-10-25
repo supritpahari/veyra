@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Veyra Health — Logo Concepts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #F8FAFC; --surface: #FFFFFF; --sunk: #F1F5F9;
+      --ink: #102A43; --ink2: #486581; --ink3: #829AB1;
+      --line: #E2E8F0; --line2: #CBD5E1;
+      --teal: #0E7490; --teal-dark: #2BB3A6; --navy: #06182A;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15px; -webkit-font-smoothing: antialiased; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 52px 28px 90px; }
+    .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); margin-bottom: 10px; }
+    h1 { font-size: 30px; letter-spacing: -0.02em; margin: 0 0 10px; }
+    .lede { color: var(--ink2); max-width: 64ch; margin: 0; }
+    section { margin-top: 60px; }
+    .shead { display: flex; align-items: baseline; gap: 14px; border-top: 2px solid var(--ink); padding-top: 18px; }
+    .cnum { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--teal); }
+    h2 { font-size: 20px; margin: 0; letter-spacing: -0.01em; }
+    .rt { color: var(--ink2); font-size: 14px; margin: 10px 0 24px; max-width: 74ch; line-height: 1.55; }
+    .r { display: flex; gap: 16px; align-items: stretch; flex-wrap: wrap; margin-bottom: 16px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .chipcard { background: var(--navy); border-radius: 12px; padding: 18px 20px 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .lbl { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: .06em; color: var(--ink3); text-transform: uppercase; display: block; margin-top: 10px; text-align: center; }
+    .chipcard .lbl { color: #6B859F; }
+    .iconrow { display: flex; gap: 16px; align-items: stretch; flex-wrap: wrap; }
+    .fvstrip { display: flex; align-items: flex-end; gap: 18px; }
+    .fvstrip > div { display: flex; flex-direction: column; align-items: center; }
+    .fvstrip .lbl { margin-top: 8px; }
+    footer { margin-top: 70px; border-top: 1px solid var(--line); padding-top: 18px; color: var(--ink3); font-size: 13px; line-height: 1.6; }
+    footer code { font-family: 'IBM Plex Mono', monospace; font-size: 12px; background: var(--sunk); padding: 2px 6px; border-radius: 6px; color: var(--ink2); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">SVG Logo Package · Veyra Health</p>
+    <h1>Logo concepts</h1>
+    <p class="lede">Three directions built on Veyra's system: navy <b>#102A43</b> · teal <b>#0E7490 / #2BB3A6</b> · IBM Plex. Each concept ships as icon, horizontal (light + dark), vertical, wordmark, and mono variants.</p>
+
+    <!-- ======================= CONCEPT 1 ======================= -->
+    <section>
+      <div class="shead"><span class="cnum">Concept 01</span><h2>Vertex — the verified pivot</h2></div>
+      <p class="rt">An evolution of the current favicon: a white V with a gap at its valley where a teal node sits — the point of inspection. The navy tile gets true depth via a subtle diagonal gradient. Reads instantly as "checked", keeps full continuity with what's already in the product. Works as tiny as 16px.</p>
+
+      <div class="iconrow r">
+        <div class="card"><img src="concept-1-vertex/veyra-logo-c1-icon.svg" width="64" height="64" alt="Veyra icon full color"/><span class="lbl">Icon · full color</span></div>
+        <div class="card"><img src="concept-1-vertex/veyra-logo-c1-icon-mono-navy.svg" width="64" height="64" alt="Veyra icon mono navy"/><span class="lbl">Mono navy</span></div>
+        <div class="chipcard"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="64" height="64"><g fill="none" stroke="#F8FAFC" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.75 11 L22.18 31.56"/><path d="M25.82 31.56 L34.25 11"/></g><circle cx="24" cy="36" r="3.2" fill="#F8FAFC"/></svg><span class="lbl">Mono white · on dark</span></div>
+        <div class="card"><div class="fvstrip">
+          <div><img src="concept-1-vertex/veyra-logo-c1-icon.svg" width="48" height="48" alt="@48"/><span class="lbl">48px</span></div>
+          <div><img src="concept-1-vertex/veyra-logo-c1-icon.svg" width="26" height="26" alt="@26"/><span class="lbl">26px</span></div>
+          <div><img src="concept-1-vertex/veyra-logo-c1-icon.svg" width="16" height="16" alt="@16"/><span class="lbl">16px</span></div>
+        </div><span class="lbl">Favicon stress test</span></div>
+      </div>
+
+      <div class="r">
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 236 48" width="236" height="48" role="img"><defs><linearGradient id="vtile1h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17395C"/><stop offset="1" stop-color="#0A2039"/></linearGradient></defs><rect width="48" height="48" rx="13" fill="url(#vtile1h)"/><g fill="none" stroke="#F8FAFC" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.75 11 L22.18 31.56"/><path d="M25.82 31.56 L34.25 11"/></g><circle cx="24" cy="36" r="3.2" fill="#2BB3A6"/><text x="62" y="32.5" font-family="'IBM Plex Sans',system-ui,sans-serif" font-size="24.5" font-weight="600" letter-spacing="-0.5" fill="#102A43">Veyra Health</text></svg><span class="lbl">Horizontal lockup · light</span></div>
+        <div class="chipcard"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 236 48" width="236" height="48" role="img"><rect width="48" height="48" rx="13" fill="#122E4B"/><g fill="none" stroke="#F8FAFC" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.75 11 L22.18 31.56"/><path d="M25.82 31.56 L34.25 11"/></g><circle cx="24" cy="36" r="3.2" fill="#2BB3A6"/><text x="62" y="32.5" font-family="'IBM Plex Sans',system-ui,sans-serif" font-size="24.5" font-weight="600" letter-spacing="-0.5" fill="#F8FAFC">Veyra Health</text></svg><span class="lbl">Horizontal lockup · dark</span></div>
+      </div>
+
+      <div class="r">
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 134" width="150" height="134" role="img"><defs><linearGradient id="vtile1v" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17395C"/><stop offset="1" stop-color="#0A2039"/></linearGradient></defs><g transform="translate(47,10) scale(1.1667)"><rect width="48" height="48" rx="13" fill="url(#vtile1v)"/><g fill="none" stroke="#F8FAFC" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.75 11 L22.18 31.56"/><path d="M25.82 31.56 L34.25 11"/></g><circle cx="24" cy="36" r="3.2" fill="#2BB3A6"/></g><text x="75" y="96" text-anchor="middle" font-family="'IBM Plex Sans',system-ui,sans-serif" font-size="22" font-weight="600" letter-spacing="-0.4" fill="#102A43">Veyra Health</text><text x="75" y="118" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="10.5" letter-spacing="1.7" fill="#829AB1">EVIDENCE FIRST</text></svg><span class="lbl">Vertical lockup</span></div>
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" width="240" height="64" role="img"><text x="2" y="46" font-family="'IBM Plex Sans',system-ui,sans-serif" font-size="44" font-weight="600" letter-spacing="-0.9" fill="#102A43">Veyra</text><circle cx="121" cy="41.5" r="4.4" fill="#0E7490"/></svg><span class="lbl">Wordmark · teal data point</span></div>
+      </div>
+    </section>
+
+    <!-- ======================= CONCEPT 2 ======================= -->
+    <section>
+      <div class="shead"><span class="cnum">Concept 02</span><h2>Receipt — value you can audit</h2></div>
+      <p class="rt">The V told as a lab receipt: the left arm is the solid observed value; the right arm is the backing data, dashed like report lines; the teal node at the vertex is the insight — the one point that was actually inspected. The wordmark echoes it with a dashed baseline rule.</p>
+
+      <div class="iconrow r">
+        <div class="card"><img src="concept-2-receipt/veyra-logo-c2-icon.svg" width="64" height="64" alt="Veyra icon full color"/><span class="lbl">Icon · full color</span></div>
+        <div class="card"><img src="concept-2-receipt/veyra-logo-c2-icon-mono-navy.svg" width="64" height="64" alt="Veyra icon mono navy"/><span class="lbl">Mono navy</span></div>
+        <div class="chipcard"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="64" height="64"><g fill="none" stroke="#F8FAFC" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.75 11 L24 36"/><path d="M24 36 L26.16 30.73"/><path d="M28.04 26.14 L30.2 20.87"/><path d="M32.08 16.28 L34.25 11"/></g><circle cx="24" cy="36" r="3.2" fill="#F8FAFC"/></svg><span class="lbl">Mono white · on dark</span></div>
+        <div class="card"><div class="fvstrip">
+          <div><img src="concept-2-receipt/veyra-logo-c2-icon.svg" width="48" height="48" alt="@48"/><span class="lbl">48px</span></div>
+          <div><img src="concept-2-receipt/veyra-logo-c2-icon.svg" width="26" height="26" alt="@26"/><span class="lbl">26px</span></div>
+          <div><img src="concept-2-receipt/veyra-logo-c2-icon.svg" width="16" height="16" alt="@16"/><span class="lbl">16px</span></div>
+        </div><span class="lbl">Favicon stress test</span></div>
+      </div>
+
+      <div class="r">
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 236 48" width="236" height="48" role="img"><defs><linearGradient id="vtile2h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17395C"/><stop offset="1" stop-color="#0A2039"/></linearGradient></defs><rect width="48" height="48" rx="13" fill="url(#vtile2h)"/><g fill="none" stroke="#F8FAFC" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.75 11 L24 36"/><path d="M24 36 L26.16 30.73"/><path d="M28.04 26.14 L30.2 20.87"/><path d="M32.08 16.28 L34.25 11"/></g><circle cx="24" cy="36" r="3.2" fill="#2BB3A6"/><text x="62" y="32.5" font-family="'IBM Plex Sans',system-ui,sans-serif" font-size="24.5" font-weight="600" letter-spacing="-0.5" fill="#102A43">Veyra Health</text></svg><span class="lbl">Horizontal lockup · light</span></div>
+        <div class="chipcard"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 236 48" width="236" height="48" role="img"><rect width="48" height="48" rx="13" fill="#122E4B"/><g fill="none" stroke="#F8FAFC" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.75 11 L24 36"/><path d="M24 36 L26.16 30.73"/><path d="M28.04 26.14 L30.2 20.87"/><path d="M32.08 16.28 L34.25 11"/></g><circle cx="24" cy="36" r="3.2" fill="#2BB3A6"/><text x="62" y="32.5" font-family="'IBM Plex Sans',system-ui,sans-serif" font-size="24.5" font-weight="600" letter-spacing="-0.5" fill="#F8FAFC">Veyra Health</text></svg><span class="lbl">Horizontal lockup · dark</span></div>
+      </div>
+
+      <div class="r">
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 134" width="150" height="134" role="img"><defs><linearGradient id="vtile2v" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17395C"/><stop offset="1" stop-color="#0A2039"/></linearGradient></defs><g transform="translate(47,10) scale(1.1667)"><rect width="48" height="48" rx="13" fill="url(#vtile2v)"/><g fill="none" stroke="#F8FAFC" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.75 11 L24 36"/><path d="M24 36 L26.16 30.73"/><path d="M28.04 26.14 L30.2 20.87"/><path d="M32.08 16.28 L34.25 11"/></g><circle cx="24" cy="36" r="3.2" fill="#2BB3A6"/></g><text x="75" y="96" text-anchor="middle" font-family="'IBM Plex Sans',system-ui,sans-serif" font-size="22" font-weight="600" letter-spacing="-0.4" fill="#102A43">Veyra Health</text><text x="75" y="118" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="10.5" letter-spacing="1.7" fill="#829AB1">EVIDENCE FIRST</text></svg><span class="lbl">Vertical lockup</span></div>
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" width="240" height="64" role="img"><text x="2" y="46" font-family="'IBM Plex Sans',system-ui,sans-serif" font-size="44" font-weight="600" letter-spacing="-0.9" fill="#102A43">Veyra</text><path d="M2 59 H112" fill="none" stroke="#102A43" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="7 5"/></svg><span class="lbl">Wordmark · receipt rule</span></div>
+      </div>
+    </section>
+
+    <!-- ======================= CONCEPT 3 ======================= -->
+    <section>
+      <div class="shead"><span class="cnum">Concept 03</span><h2>Reference Interval — typography-led</h2></div>
+      <p class="rt">The mark is a lab reference-interval bar: end ticks, a teal in-range segment, and a punched-out value dot sitting on the rule. The same interval bar anchors the wordmark, with a spaced mono "HEALTH". The most literal, product-true direction, and the most typographic.</p>
+
+      <div class="iconrow r">
+        <div class="card"><img src="concept-3-interval/veyra-logo-c3-icon.svg" width="64" height="64" alt="Veyra icon full color"/><span class="lbl">Icon · full color</span></div>
+        <div class="card"><img src="concept-3-interval/veyra-logo-c3-icon-mono-navy.svg" width="64" height="64" alt="Veyra icon mono navy"/><span class="lbl">Mono navy</span></div>
+        <div class="chipcard"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="64" height="64"><g fill="none" stroke="#F8FAFC" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 27 H37"/><path d="M11 24 V30"/><path d="M37 24 V30"/></g><g fill="none" stroke="#F8FAFC" stroke-width="5" stroke-linecap="round"><path d="M20 27 H22.2"/><path d="M25.8 27 H28"/></g></svg><span class="lbl">Mono white · on dark</span></div>
+        <div class="card"><div class="fvstrip">
+          <div><img src="concept-3-interval/veyra-logo-c3-icon.svg" width="48" height="48" alt="@48"/><span class="lbl">48px</span></div>
+          <div><img src="concept-3-interval/veyra-logo-c3-icon.svg" width="26" height="26" alt="@26"/><span class="lbl">26px</span></div>
+          <div><img src="concept-3-interval/veyra-logo-c3-icon.svg" width="16" height="16" alt="@16"/><span class="lbl">16px</span></div>
+        </div><span class="lbl">Favicon stress test</span></div>
+      </div>
+
+      <div class="r">
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 236 48" width="236" height="48" role="img"><defs><linearGradient id="vtile3h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17395C"/><stop offset="1" stop-color="#0A2039"/></linearGradient></defs><rect width="48" height="48" rx="13" fill="url(#vtile3h)"/><g fill="none" stroke="#F8FAFC" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 27 H37"/><path d="M11 24 V30"/><path d="M37 24 V30"/></g><g fill="none" stroke="#2BB3A6" stroke-width="5" stroke-linecap="round"><path d="M20 27 H22.2"/><path d="M25.8 27 H28"/></g><text x="62" y="32.5" font-family="'IBM Plex Sans',system-ui,sans-serif" font-size="24.5" font-weight="600" letter-spacing="-0.5" fill="#102A43">Veyra Health</text></svg><span class="lbl">Horizontal lockup · light</span></div>
+        <div class="chipcard"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 236 48" width="236" height="48" role="img"><rect width="48" height="48" rx="13" fill="#122E4B"/><g fill="none" stroke="#F8FAFC" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 27 H37"/><path d="M11 24 V30"/><path d="M37 24 V30"/></g><g fill="none" stroke="#2BB3A6" stroke-width="5" stroke-linecap="round"><path d="M20 27 H22.2"/><path d="M25.8 27 H28"/></g><text x="62" y="32.5" font-family="'IBM Plex Sans',system-ui,sans-serif" font-size="24.5" font-weight="600" letter-spacing="-0.5" fill="#F8FAFC">Veyra Health</text></svg><span class="lbl">Horizontal lockup · dark</span></div>
+      </div>
+
+      <div class="r">
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 134" width="150" height="134" role="img"><defs><linearGradient id="vtile3v" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17395C"/><stop offset="1" stop-color="#0A2039"/></linearGradient></defs><g transform="translate(47,10) scale(1.1667)"><rect width="48" height="48" rx="13" fill="url(#vtile3v)"/><g fill="none" stroke="#F8FAFC" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 27 H37"/><path d="M11 24 V30"/><path d="M37 24 V30"/></g><g fill="none" stroke="#2BB3A6" stroke-width="5" stroke-linecap="round"><path d="M20 27 H22.2"/><path d="M25.8 27 H28"/></g></g><text x="75" y="96" text-anchor="middle" font-family="'IBM Plex Sans',system-ui,sans-serif" font-size="22" font-weight="600" letter-spacing="-0.4" fill="#102A43">Veyra Health</text><text x="75" y="118" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="10.5" letter-spacing="1.7" fill="#829AB1">EVIDENCE FIRST</text></svg><span class="lbl">Vertical lockup</span></div>
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" width="240" height="64" role="img"><text x="2" y="46" font-family="'IBM Plex Sans',system-ui,sans-serif" font-size="44" font-weight="600" letter-spacing="-0.9" fill="#102A43">Veyra</text><g fill="none" stroke="#102A43" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 58 H112"/><path d="M2 54.5 V61.5"/><path d="M112 54.5 V61.5"/></g><path d="M40 58 H76" fill="none" stroke="#0E7490" stroke-width="4.6" stroke-linecap="round"/><text x="126" y="46" font-family="'IBM Plex Mono',monospace" font-size="11.5" letter-spacing="3.3" fill="#486581">HEALTH</text></svg><span class="lbl">Wordmark · interval bar</span></div>
+      </div>
+    </section>
+
+    <footer>
+      <b>Notes.</b> Open a concept in any browser or design tool: <code>logos/concept-&lt;n&gt;/*.svg</code>. Text-based lockups use IBM Plex Sans / IBM Plex Mono (already loaded by the app via Google Fonts); if you place the SVG files in print or in tools without Plex installed, convert live text to outlines or install IBM Plex. Tile gradient: <code>#17395C → #0A2039</code> · accents: <code>#2BB3A6</code> on navy, <code>#0E7490</code> on light. PNG export: <code>inkscape file.svg -w 1024 -o file.png</code>.
+    </footer>
+  </div>
+</body>
+</html>

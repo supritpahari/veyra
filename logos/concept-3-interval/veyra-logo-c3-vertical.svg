@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 134" role="img" aria-labelledby="t d">
+  <title id="t">Veyra Health</title>
+  <desc id="d">Veyra Health vertical lockup: interval-bracket tile mark above the wordmark and a mono tagline.</desc>
+  <defs>
+    <linearGradient id="vtile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#17395C"/>
+      <stop offset="1" stop-color="#0A2039"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(47,10) scale(1.1667)">
+    <rect width="48" height="48" rx="13" fill="url(#vtile)"/>
+    <g fill="none" stroke="#F8FAFC" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 27 H37"/>
+      <path d="M11 24 V30"/>
+      <path d="M37 24 V30"/>
+    </g>
+    <g fill="none" stroke="#2BB3A6" stroke-width="5" stroke-linecap="round">
+      <path d="M20 27 H22.2"/>
+      <path d="M25.8 27 H28"/>
+    </g>
+  </g>
+  <text x="75" y="96" text-anchor="middle" font-family="'IBM Plex Sans','Geist',system-ui,-apple-system,'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="22" font-weight="600" letter-spacing="-0.4" fill="#102A43">Veyra Health</text>
+  <text x="75" y="118" text-anchor="middle" font-family="'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace" font-size="10.5" letter-spacing="1.7" fill="#829AB1">EVIDENCE FIRST</text>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" role="img" aria-labelledby="t d">
+  <title id="t">Veyra wordmark</title>
+  <desc id="d">Typography-only lockup: Veyra in semibold navy over a dashed baseline rule, like a lab receipt.</desc>
+  <text x="2" y="46" font-family="'IBM Plex Sans','Geist',system-ui,-apple-system,'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="44" font-weight="600" letter-spacing="-0.9" fill="#102A43">Veyra</text>
+  <path d="M2 59 H112" fill="none" stroke="#102A43" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="7 5"/>
+</svg>

@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import type { ThemeType, FontType } from '../types';
-import { useVeyra } from '../context/VeyraContext';
+import type { TweaksState, ThemeType, FontType } from '../types';
 
-export function TweaksPanel() {
-  const { tweaks, setTweak } = useVeyra();
+interface TweaksPanelProps {
+  tweaks: TweaksState;
+  onChange: (key: keyof TweaksState, val: string) => void;
+}
+
+export function TweaksPanel({ tweaks, onChange }: TweaksPanelProps) {
   const [open, setOpen] = useState(false);
 
   const themeOptions: { value: ThemeType; label: string }[] = [
@@ -63,7 +66,7 @@ export function TweaksPanel() {
                     role="radio"
                     aria-checked={tweaks.theme === opt.value}
                     className={tweaks.theme === opt.value ? 'active' : ''}
-                    onClick={() => setTweak('theme', opt.value)}
+                    onClick={() => onChange('theme', opt.value)}
                   >
                     {opt.label}
                   </button>
@@ -85,7 +88,7 @@ export function TweaksPanel() {
                       role="radio"
                       aria-checked={tweaks.accent === c}
                       style={{ background: c }}
-                      onClick={() => setTweak('accent', c)}
+                      onClick={() => onChange('accent', c)}
                     >
                       {tweaks.accent === c && (
                         <svg viewBox="0 0 12 12" width="10" height="10" fill="white">
@@ -111,7 +114,7 @@ export function TweaksPanel() {
                     role="radio"
                     aria-checked={tweaks.font === opt.value}
                     className={tweaks.font === opt.value ? 'active' : ''}
-                    onClick={() => setTweak('font', opt.value)}
+                    onClick={() => onChange('font', opt.value)}
                   >
                     {opt.label}
                   </button>
