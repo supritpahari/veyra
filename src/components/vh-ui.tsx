@@ -4,17 +4,25 @@ import { VH_FLAG_META, vhFmtRange, vhVerifyReason, VH_REPORTS } from '../data/vh
 
 export function Logo() {
   return (
-    <svg className="vh-logo__m" viewBox="0 0 26 26" aria-hidden="true">
-      <rect width="26" height="26" rx="7" fill="var(--ink)" />
+    <svg className="vh-logo__m" viewBox="0 0 48 48" aria-hidden="true">
+      <rect width="48" height="48" rx="13" fill="var(--ink)" />
       <path
-        d="M6.5 8 L13 19 L19.5 8"
+        d="M13.75 11 L22.18 31.56"
         fill="none"
         stroke="var(--bg)"
-        strokeWidth="2.2"
+        strokeWidth="4.6"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="13" cy="19" r="2.2" fill="var(--accent)" />
+      <path
+        d="M25.82 31.56 L34.25 11"
+        fill="none"
+        stroke="var(--bg)"
+        strokeWidth="4.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="24" cy="36" r="3.2" fill="var(--accent)" />
     </svg>
   );
 }
