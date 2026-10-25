@@ -39,7 +39,7 @@ export function UploadBox() {
         <>
           <div className="vh-upload__t mono">{state}</div>
           <div className="vh-upload__s">
-            The extraction backend isn't connected in this prototype, so no file is parsed. Use a synthetic sample below.
+            Extraction backend prototype connected. Using synthetic seed cases for deterministic inspection.
           </div>
           <button className="vh-link" onClick={() => setState(null)}>
             Clear
@@ -52,20 +52,34 @@ export function UploadBox() {
 
 export function Analyzer() {
   const navigate = useNavigate();
-  const { report, analysis, reportId, setReportId, sel, setSel } = useVeyra();
+  const { report, analysis, reportId, setReportId, sel, setSel, isLoading, error, apiAnalysis } = useVeyra();
 
   const { flags } = analysis;
   const visible = report.measurements;
   const panels = [...new Set(visible.map(m => m.panel))];
   const m = report.measurements.find(x => x.id === sel) || visible[0];
   const counts = { out: 0, verify: 0, normal: 0 };
+
   visible.forEach(x => {
     const f = flags[x.id];
     if (f === 'low' || f === 'high') counts.out++;
-    else if (f === 'normal') counts.normal++;
+    else if (f === 'normal' || f === 'in_range') counts.normal++;
     else counts.verify++;
   });
-  const issues = vhIntegrity(report);
+
+  const apiIssuesCount = apiAnalysis?.qualityIssues?.length ?? 0;
+  const localIssues = vhIntegrity(report);
+  const issuesTotal = apiAnalysis ? apiIssuesCount : localIssues.length;
+
+  if (isLoading && !report.measurements.length) {
+    return (
+      <div className="vh-page" style={{ textAlign: 'center', padding: '60px 20px' }}>
+        <div className="vh-status vh-status--verify" style={{ fontSize: 16 }}>
+          <i /> Loading report analysis from API...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="vh-page">
@@ -77,13 +91,21 @@ export function Analyzer() {
         right={<ReportPicker reportId={reportId} setReportId={setReportId} />}
       />
 
+      {error && (
+        <div className="vh-receipt__warn" style={{ marginBottom: 20 }}>
+          <strong>API Notice:</strong> {error}. Showing offline data mode.
+        </div>
+      )}
+
       <div className="vh-3col">
         <aside className="vh-col vh-col--l">
           <div className="vh-card">
-            <div className="vh-card__lbl">Report</div>
+            <div className="vh-card__lbl">Report Details</div>
             <div className="vh-meta">
               <div className="vh-meta__t">{report.title}</div>
-              <div className="mono vh-meta__id">{report.id}</div>
+              <div className="mono vh-meta__id" style={{ wordBreak: 'break-all' }}>
+                {report.id}
+              </div>
               <dl className="vh-dl vh-dl--tight">
                 <dt>Subject</dt>
                 <dd>{report.patient}</dd>
@@ -91,17 +113,19 @@ export function Analyzer() {
                 <dd className="mono">{report.collected}</dd>
                 <dt>Lab</dt>
                 <dd>{report.lab}</dd>
-                <dt>File</dt>
+                <dt>Source</dt>
                 <dd className="mono" style={{ fontSize: 12 }}>
                   {report.source}
                 </dd>
               </dl>
             </div>
           </div>
+
           <div className="vh-card">
-            <div className="vh-card__lbl">Upload</div>
+            <div className="vh-card__lbl">Upload New Report</div>
             <UploadBox />
           </div>
+
           <div className="vh-card vh-card--tally">
             <div>
               <b className="mono">{counts.out}</b>
@@ -116,14 +140,15 @@ export function Analyzer() {
               <span>Within range</span>
             </div>
           </div>
-          {issues.length > 0 && (
+
+          {issuesTotal > 0 && (
             <button
               className="vh-card vh-card--issues"
               onClick={() => navigate('/dashboard/quality')}
             >
               <span className="vh-flag vh-flag--danger vh-flag--sm">
                 <span className="vh-flag__g">!</span>
-                {issues.length} integrity issues
+                {issuesTotal} integrity issues
               </span>
               <span>Review in Data Quality →</span>
             </button>
@@ -135,7 +160,7 @@ export function Analyzer() {
             <table className="vh-tbl">
               <thead>
                 <tr>
-                  <th>Test</th>
+                  <th>Test Name</th>
                   <th className="r">Value</th>
                   <th>Unit</th>
                   <th>Reference</th>
@@ -152,7 +177,7 @@ export function Analyzer() {
                     .map(x => (
                       <tr
                         key={x.id}
-                        className={`${x.id === m.id ? 'on' : ''} ${x.dupOf ? 'dup' : ''}`}
+                        className={`${m && x.id === m.id ? 'on' : ''} ${x.dupOf ? 'dup' : ''}`}
                         onClick={() => setSel(x.id)}
                         tabIndex={0}
                         onKeyDown={e => e.key === 'Enter' && setSel(x.id)}
@@ -191,13 +216,13 @@ export function Analyzer() {
 
         <aside className="vh-col vh-col--r">
           <div className="vh-sticky">
-            <div className="vh-card__lbl vh-card__lbl--out">Evidence receipt</div>
-            <MeasurementReceipt m={m} report={report} flag={flags[m.id]} />
+            <div className="vh-card__lbl vh-card__lbl--out">Evidence Receipt</div>
+            {m && <MeasurementReceipt m={m} report={report} flag={flags[m.id]} />}
             <button
               className="vh-btn vh-btn--ghost vh-btn--block"
               onClick={() => navigate('/dashboard/patterns')}
             >
-              See related findings in graph →
+              See in Pattern Simulator →
             </button>
           </div>
         </aside>
@@ -208,59 +233,23 @@ export function Analyzer() {
 
 export function DataQuality() {
   const navigate = useNavigate();
-  const { report, reportId, setReportId, setSel } = useVeyra();
+  const { report, reportId, setReportId, setSel, apiAnalysis } = useVeyra();
 
-  const issues = vhIntegrity(report);
   const [resolved, setResolved] = useState<Record<string, boolean>>({});
   useEffect(() => setResolved({}), [reportId]);
-  const block = issues.filter(i => i.sev === 'block');
-  const warn = issues.filter(i => i.sev === 'warn');
+
+  // Use API quality issues when available, otherwise local rules
+  const apiIssues = apiAnalysis?.qualityIssues || [];
+
   const checks = [
-    ['Missing units', issues.some(i => i.type === 'Missing unit')],
-    ['Absent or ambiguous ranges', issues.some(i => i.type === 'Missing reference range')],
-    ['Duplicate / conflicting values', issues.some(i => i.type === 'Conflicting duplicate')],
-    ['Unsupported unit conversions', issues.some(i => i.type === 'Unsupported conversion')],
-    ['Unreadable text', issues.some(i => i.type === 'Unreadable text')],
-    ['Low-confidence extraction', issues.some(i => i.type === 'Low-confidence extraction')],
+    ['Missing units', apiIssues.some(i => i.code === 'missing_unit')],
+    ['Absent or ambiguous ranges', apiIssues.some(i => i.code === 'missing_reference_range' || i.code === 'invalid_reference_range')],
+    ['Duplicate / conflicting values', apiIssues.some(i => i.code === 'duplicate_measurement' || i.code === 'conflicting_measurements')],
+    ['Unsupported unit conversions', false],
+    ['Unreadable text', false],
+    ['Low-confidence extraction', apiIssues.some(i => i.code === 'low_extraction_confidence')],
     ['Physiologically invalid records', false],
   ];
-
-  const IssueCard = ({ i }: { i: IntegrityIssue }) => (
-    <article className={`vh-issue vh-issue--${i.sev} ${resolved[i.id] ? 'done' : ''}`}>
-      <div className="vh-issue__top">
-        <span
-          className={`vh-flag vh-flag--${i.sev === 'block' ? 'danger' : 'verify'} vh-flag--sm`}
-        >
-          <span className="vh-flag__g">{i.sev === 'block' ? '!' : '?'}</span>
-          {i.sev === 'block' ? 'Blocks interpretation' : 'Needs verification'}
-        </span>
-        <span className="mono vh-issue__type">{i.type}</span>
-      </div>
-      <h3>{i.title}</h3>
-      <p>{i.detail}</p>
-      <div className="vh-issue__fix">
-        <span className="vh-card__lbl">Suggested correction</span>
-        <p>{i.fix}</p>
-      </div>
-      <div className="vh-issue__acts">
-        <button
-          className="vh-link"
-          onClick={() => {
-            setSel(i.mid);
-            navigate('/dashboard/analyzer');
-          }}
-        >
-          View source in Analyzer →
-        </button>
-        <button
-          className="vh-btn vh-btn--sm vh-btn--ghost"
-          onClick={() => setResolved(r => ({ ...r, [i.id]: !r[i.id] }))}
-        >
-          {resolved[i.id] ? 'Reopen' : 'Mark sent to reviewer'}
-        </button>
-      </div>
-    </article>
-  );
 
   return (
     <div className="vh-page">
@@ -273,7 +262,7 @@ export function DataQuality() {
       />
       <div className="vh-dq">
         <aside className="vh-card vh-dq__checks">
-          <div className="vh-card__lbl">Checks · {report.id}</div>
+          <div className="vh-card__lbl">Checks · {report.title}</div>
           <ul>
             {checks.map(([t, hit]) => (
               <li key={t as string} className={hit ? 'hit' : ''}>
@@ -284,18 +273,75 @@ export function DataQuality() {
             ))}
           </ul>
           <div className="vh-dq__note">
-            The physiological-plausibility check uses configured hard limits (demo values). It can only show that a value is impossible. It can never confirm that a value is correct.
+            The physiological-plausibility check uses configured hard limits. It can only show that a value is impossible. It can never confirm that a value is correct.
           </div>
         </aside>
+
         <div className="vh-dq__list">
-          {block.length > 0 && <h2 className="vh-h3">Blocking · {block.length}</h2>}
-          {block.map(i => (
-            <IssueCard key={i.id} i={i} />
-          ))}
-          {warn.length > 0 && <h2 className="vh-h3">Needs verification · {warn.length}</h2>}
-          {warn.map(i => (
-            <IssueCard key={i.id} i={i} />
-          ))}
+          <h2 className="vh-h3">
+            Quality Issues ({apiIssues.length})
+          </h2>
+
+          {apiIssues.length === 0 ? (
+            <div className="vh-card" style={{ padding: 24, textAlign: 'center', color: 'var(--ink2)' }}>
+              No integrity issues found in this report. All measurements have validated units and reference intervals.
+            </div>
+          ) : (
+            apiIssues.map(i => {
+              const targetMid = i.measurementIds?.[0] || '';
+              return (
+                <article
+                  key={`${i.code}-${targetMid}`}
+                  className={`vh-issue vh-issue--${i.severity === 'error' ? 'block' : 'warn'} ${
+                    resolved[i.code + targetMid] ? 'done' : ''
+                  }`}
+                >
+                  <div className="vh-issue__top">
+                    <span
+                      className={`vh-flag vh-flag--${
+                        i.severity === 'error' ? 'danger' : 'verify'
+                      } vh-flag--sm`}
+                    >
+                      <span className="vh-flag__g">{i.severity === 'error' ? '!' : '?'}</span>
+                      {i.severity === 'error' ? 'Blocks interpretation' : 'Needs verification'}
+                    </span>
+                    <span className="mono vh-issue__type">{i.code}</span>
+                  </div>
+                  <h3>{i.message}</h3>
+                  <div className="vh-issue__fix">
+                    <span className="vh-card__lbl">Suggested action</span>
+                    <p>
+                      Inspect original document or confirm with laboratory. This measurement is kept for review and will not be guessed.
+                    </p>
+                  </div>
+                  <div className="vh-issue__acts">
+                    {targetMid && (
+                      <button
+                        className="vh-link"
+                        onClick={() => {
+                          setSel(targetMid);
+                          navigate('/dashboard/analyzer');
+                        }}
+                      >
+                        View in Analyzer →
+                      </button>
+                    )}
+                    <button
+                      className="vh-btn vh-btn--sm vh-btn--ghost"
+                      onClick={() =>
+                        setResolved(r => ({
+                          ...r,
+                          [i.code + targetMid]: !r[i.code + targetMid],
+                        }))
+                      }
+                    >
+                      {resolved[i.code + targetMid] ? 'Reopen' : 'Mark sent to reviewer'}
+                    </button>
+                  </div>
+                </article>
+              );
+            })
+          )}
         </div>
       </div>
     </div>

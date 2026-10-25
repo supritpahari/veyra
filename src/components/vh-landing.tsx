@@ -1,24 +1,25 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { VH_REPORTS, vhAnalyze, vhFmtRange, vhVerifyReason } from '../data/vh-data';
+import { vhFmtRange, vhVerifyReason } from '../data/vh-data';
+import { useVeyra } from '../context/VeyraContext';
 import { Eyebrow, FlagBadge, KindTag, fmtVal } from './vh-ui';
 
 export function HeroSpecimen() {
   const navigate = useNavigate();
-  const r = VH_REPORTS[0];
-  const { flags } = vhAnalyze(r);
-  const rows = ['hgb', 'mcv', 'ferr', 'iron', 'tibc', 'b12', 'tsh']
-    .map(id => r.measurements.find(m => m.id === id))
-    .filter(Boolean) as typeof r.measurements;
-  const [sel, setSel] = useState('ferr');
-  const m = rows.find(x => x.id === sel) || rows[0];
+  const { report, analysis } = useVeyra();
+  const rows = report.measurements.slice(0, 7);
+  const [sel, setSel] = useState<string>('');
+  const activeId = sel || (rows[0]?.id ?? '');
+  const m = rows.find(x => x.id === activeId) || rows[0];
+
+  if (!m) return null;
 
   return (
     <div className="vh-spec">
       <div className="vh-spec__bar">
-        <span className="mono">{r.id}</span>
+        <span className="mono">{report.id.slice(0, 8)}</span>
         <span>·</span>
-        <span>{r.source}</span>
+        <span>{report.source}</span>
         <span className="vh-spec__live">
           <i />Live specimen
         </span>
@@ -29,14 +30,14 @@ export function HeroSpecimen() {
             {rows.map(x => (
               <tr
                 key={x.id}
-                className={x.id === sel ? 'on' : ''}
+                className={x.id === activeId ? 'on' : ''}
                 onClick={() => setSel(x.id)}
               >
                 <td>{x.short || x.name}</td>
                 <td className="mono num">{fmtVal(x)}</td>
                 <td className="mono dim">{x.unit || '—'}</td>
                 <td>
-                  <FlagBadge flag={flags[x.id]} size="sm" />
+                  <FlagBadge flag={analysis.flags[x.id] || x.status || 'normal'} size="sm" />
                 </td>
               </tr>
             ))}
@@ -45,18 +46,18 @@ export function HeroSpecimen() {
         <div className="vh-spec__rcpt">
           <div className="vh-receipt__lbl">Evidence receipt</div>
           <div className="vh-spec__name">{m.name}</div>
-          <pre className="mono">{m.src}</pre>
+          <pre className="mono">{m.src || `${m.name}: ${m.value} ${m.unit || ''}`}</pre>
           <div className="vh-spec__kv">
             <span>Reference</span>
             <b className="mono">{m.range ? vhFmtRange(m.range) : 'not on report'}</b>
             <span>Flag source</span>
             <b>
-              <KindTag kind="deterministic" />
+              <KindTag kind={m.evidence?.method || 'deterministic'} />
             </b>
           </div>
-          {vhVerifyReason(m, r) && (
+          {vhVerifyReason(m, report) && (
             <div className="vh-receipt__warn">
-              <strong>{vhVerifyReason(m, r)}.</strong> Held for review, not guessed.
+              <strong>{vhVerifyReason(m, report)}.</strong> Held for review, not guessed.
             </div>
           )}
         </div>
