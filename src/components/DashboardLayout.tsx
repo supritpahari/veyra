@@ -1,6 +1,5 @@
 import { NavLink, Outlet, Link } from 'react-router-dom';
 import { useVeyra } from '../context/VeyraContext';
-import { VH_REPORTS } from '../data/vh-data';
 
 const DASHBOARD_NAV_ITEMS = [
   {
@@ -20,7 +19,7 @@ const DASHBOARD_NAV_ITEMS = [
   {
     path: '/dashboard/patterns',
     label: 'Pattern Explorer',
-    sub: 'Interactive pattern graph',
+    sub: 'Graph & live simulation API',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <circle cx="18" cy="5" r="3" />
@@ -66,7 +65,7 @@ const DASHBOARD_NAV_ITEMS = [
 ];
 
 export function DashboardLayout() {
-  const { reportId, setReportId, report } = useVeyra();
+  const { reportId, setReportId, report, availableReports, isBackendConnected } = useVeyra();
 
   return (
     <div className="vh-dashboard-shell">
@@ -74,28 +73,53 @@ export function DashboardLayout() {
       <aside className="vh-sidebar">
         <div className="vh-sidebar__top">
           <div className="vh-sidebar__header">
-            <span className="vh-sidebar__badge">DASHBOARD</span>
-            <h2 className="vh-sidebar__title">Clinical Workspace</h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span className="vh-sidebar__badge">CLINICAL WORKSPACE</span>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  fontSize: 10,
+                  fontFamily: 'var(--f-mono)',
+                  color: isBackendConnected ? 'var(--ok)' : 'var(--amber)',
+                }}
+              >
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background: isBackendConnected ? 'var(--ok)' : 'var(--amber)',
+                  }}
+                />
+                {isBackendConnected ? 'LIVE API' : 'OFFLINE'}
+              </span>
+            </div>
+            <h2 className="vh-sidebar__title">Dashboard</h2>
           </div>
 
           {/* Active Case Selector Card */}
           <div className="vh-sidebar__case">
-            <div className="vh-sidebar__case-label">ACTIVE REPORT</div>
+            <div className="vh-sidebar__case-label">REPORTS IN DATABASE</div>
             <div className="vh-sidebar__case-selector">
-              {VH_REPORTS.map(r => (
+              {availableReports.map((r, i) => (
                 <button
                   key={r.id}
                   type="button"
                   className={`vh-case-btn ${r.id === reportId ? 'active' : ''}`}
                   onClick={() => setReportId(r.id)}
+                  title={r.title}
                 >
-                  <span className="mono">{r.id}</span>
+                  <span className="mono">Sample {String.fromCharCode(65 + i)}</span>
                 </button>
               ))}
             </div>
             <div className="vh-sidebar__case-info">
-              <div className="vh-sidebar__case-name">{report.patient}</div>
-              <div className="vh-sidebar__case-sub">{report.lab}</div>
+              <div className="vh-sidebar__case-name">{report.title}</div>
+              <div className="vh-sidebar__case-sub">
+                {report.measurements.length} tests · {report.source}
+              </div>
             </div>
           </div>
         </div>
@@ -124,10 +148,10 @@ export function DashboardLayout() {
         <div className="vh-sidebar__foot">
           <div className="vh-sidebar__engine">
             <span className="vh-sidebar__dot" />
-            <span>Deterministic Rules v0.1</span>
+            <span>Deterministic Rules Engine</span>
           </div>
           <Link to="/" className="vh-sidebar__home-link">
-            ← Overview &amp; Hero
+            ← Overview &amp; Hero Section
           </Link>
         </div>
       </aside>

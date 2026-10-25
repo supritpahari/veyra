@@ -1,6 +1,7 @@
 import React from 'react';
 import type { FlagType, KindType, Measurement, Report } from '../types';
-import { VH_FLAG_META, vhFmtRange, vhVerifyReason, VH_REPORTS } from '../data/vh-data';
+import { VH_FLAG_META, vhFmtRange } from '../data/vh-data';
+import { useVeyra } from '../context/VeyraContext';
 
 export function Logo() {
   return (
@@ -19,8 +20,8 @@ export function Logo() {
   );
 }
 
-export function FlagBadge({ flag, size = 'md' }: { flag: FlagType; size?: 'sm' | 'md' }) {
-  const m = VH_FLAG_META[flag] || VH_FLAG_META.verify;
+export function FlagBadge({ flag, size = 'md' }: { flag: FlagType | string; size?: 'sm' | 'md' }) {
+  const m = VH_FLAG_META[flag as FlagType] || VH_FLAG_META.verify;
   return (
     <span className={`vh-flag vh-flag--${m.tone} vh-flag--${size}`}>
       <span className="vh-flag__g" aria-hidden="true">{m.glyph}</span>
@@ -35,6 +36,7 @@ export function KindTag({ kind }: { kind: KindType | string }) {
     associated: ['Associated', 'Linked by configured rule'],
     inferred: ['Inferred', 'Suggested pattern; not verified'],
     deterministic: ['Deterministic', 'Rule-based logic'],
+    reference_range: ['Reference Range', 'Deterministic interval comparison'],
     model: ['Model', 'Machine-learning output'],
     unverified: ['Unverified', 'Cannot be verified from evidence'],
   };
@@ -51,10 +53,36 @@ export function Eyebrow({ children }: { children: React.ReactNode }) {
 }
 
 export function SynthBanner({ children }: { children?: React.ReactNode }) {
+  const { apiAnalysis, isBackendConnected } = useVeyra();
   return (
     <div className="vh-synth">
-      <span className="vh-synth__tag">SYNTHETIC DATA</span>
-      <span>{children || 'Prototype for review by qualified professionals. Not a diagnostic system.'}</span>
+      <span className="vh-synth__tag">
+        {apiAnalysis?.sourceType?.toUpperCase() || 'SYNTHETIC'} DATA
+      </span>
+      <span>
+        {children ||
+          apiAnalysis?.disclaimer ||
+          'Veyra is a prototype for inspecting laboratory data, not a diagnostic system. Review results with a qualified healthcare professional.'}
+      </span>
+      <span
+        style={{
+          marginLeft: 'auto',
+          fontSize: '11px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+        }}
+      >
+        <span
+          style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: isBackendConnected ? 'var(--ok)' : 'var(--amber)',
+          }}
+        />
+        {isBackendConnected ? 'API Connected' : 'Offline Mode'}
+      </span>
     </div>
   );
 }
@@ -89,17 +117,20 @@ export function ReportPicker({
   reportId: string;
   setReportId: (id: string) => void;
 }) {
+  const { availableReports } = useVeyra();
+
   return (
     <div className="vh-seg" role="tablist">
-      {VH_REPORTS.map(r => (
+      {availableReports.map((r, i) => (
         <button
           key={r.id}
           role="tab"
           aria-selected={r.id === reportId}
           className={r.id === reportId ? 'on' : ''}
           onClick={() => setReportId(r.id)}
+          title={r.title}
         >
-          <span className="mono">{r.id}</span>
+          <span className="mono">Sample {String.fromCharCode(65 + i)}</span>
         </button>
       ))}
     </div>
@@ -120,20 +151,21 @@ export function MeasurementReceipt({
   report: Report;
   flag: FlagType;
 }) {
-  const reason = vhVerifyReason(m, report);
   return (
     <div className="vh-receipt">
       <div className="vh-receipt__head">
         <div>
           <div className="vh-receipt__name">{m.name}</div>
-          <div className="vh-receipt__sub mono">{m.panel} · line {m.line}</div>
+          <div className="vh-receipt__sub mono">{m.panel} {m.raw ? `· ${m.raw}` : ''}</div>
         </div>
         <FlagBadge flag={flag} />
       </div>
+
       <div className="vh-receipt__src">
-        <div className="vh-receipt__lbl">Source text · {report.source.split(' · ')[0]}</div>
-        <pre className="mono">{m.src}</pre>
+        <div className="vh-receipt__lbl">Source text · {report.source}</div>
+        <pre className="mono">{m.src || `${m.name}: ${m.value} ${m.unit || ''}`}</pre>
       </div>
+
       <dl className="vh-dl">
         <dt>Value</dt>
         <dd className="mono">{fmtVal(m)}</dd>
@@ -143,16 +175,23 @@ export function MeasurementReceipt({
         <dd className="mono">
           {m.range ? `${vhFmtRange(m.range)} ${m.rangeUnit || m.unit || ''}` : <em className="vh-missing">not on report</em>}
         </dd>
-        <dt>Range source</dt>
-        <dd>{m.range ? 'Printed on report' : '—'}</dd>
         <dt>Extraction</dt>
-        <dd>{m.conf === 'high' ? 'Clean parse' : m.conf === 'low' ? 'Low confidence' : 'Unreadable'}</dd>
-        <dt>Logic</dt>
-        <dd><KindTag kind="deterministic" /></dd>
+        <dd>{m.conf === 'high' ? 'Clean extraction (1.0)' : 'Verification needed (<0.8)'}</dd>
+        <dt>Method</dt>
+        <dd>
+          <KindTag kind={m.evidence?.method || 'deterministic'} />
+        </dd>
       </dl>
-      {(reason || m.note) && (
+
+      {m.evidence?.description && (
+        <div className="vh-receipt__evidence" style={{ marginTop: 12, fontSize: 13, color: 'var(--ink2)' }}>
+          <strong>Evidence detail:</strong> {m.evidence.description}
+        </div>
+      )}
+
+      {m.note && (
         <div className="vh-receipt__warn">
-          <strong>{reason || 'Note'}.</strong> {m.note || 'Veyra will not guess. This result is held for human verification.'}
+          <strong>Note.</strong> {m.note}
         </div>
       )}
     </div>

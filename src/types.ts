@@ -1,4 +1,4 @@
-export type FlagType = 'low' | 'high' | 'normal' | 'verify' | 'conflict';
+export type FlagType = 'low' | 'high' | 'normal' | 'verify' | 'conflict' | 'in_range' | 'needs_verification';
 
 export type KindType =
   | 'observed'
@@ -6,7 +6,74 @@ export type KindType =
   | 'inferred'
   | 'deterministic'
   | 'model'
-  | 'unverified';
+  | 'unverified'
+  | 'reference_range';
+
+export interface ApiMeasurement {
+  id: string;
+  reportId: string;
+  testName: string;
+  normalizedName: string;
+  value: number | null;
+  unit: string | null;
+  referenceLow: number | null;
+  referenceHigh: number | null;
+  sourceText: string;
+  extractionConfidence: number;
+  collectedAt: string;
+  status: 'low' | 'in_range' | 'high' | 'needs_verification';
+  evidence?: {
+    kind: string;
+    description: string;
+    method: string;
+  } | null;
+}
+
+export interface ApiQualityIssue {
+  code:
+    | 'missing_unit'
+    | 'missing_reference_range'
+    | 'invalid_reference_range'
+    | 'low_extraction_confidence'
+    | 'duplicate_measurement'
+    | 'conflicting_measurements'
+    | string;
+  severity: 'warning' | 'error' | string;
+  message: string;
+  measurementIds: string[];
+}
+
+export interface ApiReportListItem {
+  id: string;
+  title: string;
+  sourceType: string;
+  createdAt: string;
+}
+
+export interface ApiReportAnalysis {
+  reportId: string;
+  sourceType: string;
+  disclaimer: string;
+  measurements: ApiMeasurement[];
+  qualityIssues: ApiQualityIssue[];
+  relationships: any[];
+  inferenceStatus: string;
+}
+
+export interface ApiSimulationResult {
+  persisted: boolean;
+  disclaimer: string;
+  changedMeasurement: {
+    measurementId: string;
+    originalValue: number;
+    simulatedValue: number;
+    originalStatus: string;
+    simulatedStatus: string;
+    statusChanged: boolean;
+  };
+  originalAnalysis: ApiReportAnalysis;
+  simulatedAnalysis: ApiReportAnalysis;
+}
 
 export interface Measurement {
   id: string;
@@ -26,6 +93,12 @@ export interface Measurement {
   dupOf?: string | null;
   hidden?: boolean;
   note?: string;
+  status?: FlagType;
+  evidence?: {
+    kind: string;
+    description: string;
+    method: string;
+  } | null;
 }
 
 export interface Edge {
@@ -43,13 +116,14 @@ export interface Edge {
 export interface Report {
   id: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   patient: string;
   collected: string;
   lab: string;
   source: string;
   measurements: Measurement[];
   edges: Edge[];
+  sourceType?: string;
 }
 
 export interface FlagMetaItem {
