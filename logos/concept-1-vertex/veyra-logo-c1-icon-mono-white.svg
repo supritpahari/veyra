@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="t d">
+  <title id="t">Veyra Health (mono white)</title>
+  <desc id="d">Single-color white V with a pulse node at its vertex, for dark backgrounds.</desc>
+  <g fill="none" stroke="#F8FAFC" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13.75 11 L22.18 31.56"/>
+    <path d="M25.82 31.56 L34.25 11"/>
+  </g>
+  <circle cx="24" cy="36" r="3.2" fill="#F8FAFC"/>
+</svg>

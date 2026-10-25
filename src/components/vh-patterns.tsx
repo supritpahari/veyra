@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import type { Report, Analysis, Measurement, ApiSimulationResult, FlagType } from '../types';
+import type { Report, Analysis, ApiSimulationResult, FlagType } from '../types';
 import { VH_FLAG_META, vhFmtRange } from '../data/vh-data';
 import { useVeyra } from '../context/VeyraContext';
-import { SynthBanner, PageHead, ReportPicker, FlagBadge, KindTag, MeasurementReceipt, Eyebrow, fmtVal } from './vh-ui';
+import { SynthBanner, PageHead, ReportPicker, FlagBadge, MeasurementReceipt, Eyebrow } from './vh-ui';
 
 const VH_GW = 800,
   VH_GH = 520;
@@ -170,9 +170,9 @@ export function PatternExplorer() {
     <div className="vh-page">
       <SynthBanner />
       <PageHead
-        eyebrow="Dashboard · Pattern Explorer"
-        title="Pattern Graph & Simulation"
-        lede="Explore extracted measurements and execute deterministic one-value comparisons against backend reference intervals."
+        eyebrow="Dashboard · See Connections"
+        title="How findings connect"
+        lede="What the values suggest together, joined by rules you can open and read. Suggestions from the model are labeled separately."
         right={<ReportPicker reportId={reportId} setReportId={setReportId} />}
       />
 

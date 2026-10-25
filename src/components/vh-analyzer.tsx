@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { IntegrityIssue } from '../types';
 import { vhIntegrity, vhFmtRange } from '../data/vh-data';
 import { useVeyra } from '../context/VeyraContext';
 import { SynthBanner, PageHead, ReportPicker, FlagBadge, MeasurementReceipt, fmtVal } from './vh-ui';
@@ -39,7 +38,7 @@ export function UploadBox() {
         <>
           <div className="vh-upload__t mono">{state}</div>
           <div className="vh-upload__s">
-            Extraction backend prototype connected. Using synthetic seed cases for deterministic inspection.
+            This demo reads synthetic reports only — real-file extraction isn't wired in yet.
           </div>
           <button className="vh-link" onClick={() => setState(null)}>
             Clear
@@ -52,26 +51,38 @@ export function UploadBox() {
 
 export function Analyzer() {
   const navigate = useNavigate();
-  const { report, analysis, reportId, setReportId, sel, setSel, isLoading, error, apiAnalysis } = useVeyra();
+  const { report, analysis, sel, setSel, isLoading, error, apiAnalysis } = useVeyra();
+  const [filter, setFilter] = useState<'all' | 'out' | 'verify' | 'ok'>('all');
 
   const { flags } = analysis;
-  const visible = report.measurements;
-  const panels = [...new Set(visible.map(m => m.panel))];
-  const m = report.measurements.find(x => x.id === sel) || visible[0];
-  const counts = { out: 0, verify: 0, normal: 0 };
+  const all = report.measurements;
+  const m = all.find(x => x.id === sel) || all[0];
+  const counts = { out: 0, verify: 0, ok: 0 };
 
-  visible.forEach(x => {
+  all.forEach(x => {
     const f = flags[x.id];
     if (f === 'low' || f === 'high') counts.out++;
-    else if (f === 'normal' || f === 'in_range') counts.normal++;
+    else if (f === 'normal' || f === 'in_range') counts.ok++;
     else counts.verify++;
   });
+
+  const visible =
+    filter === 'all'
+      ? all
+      : all.filter(x => {
+          const f = flags[x.id];
+          if (filter === 'out') return f === 'low' || f === 'high';
+          if (filter === 'ok') return f === 'normal' || f === 'in_range';
+          return f !== 'low' && f !== 'high' && f !== 'normal' && f !== 'in_range';
+        });
+  const panels = [...new Set(visible.map(x => x.panel))];
+  const selectStat = (k: 'out' | 'verify' | 'ok') => setFilter(c => (c === k ? 'all' : k));
 
   const apiIssuesCount = apiAnalysis?.qualityIssues?.length ?? 0;
   const localIssues = vhIntegrity(report);
   const issuesTotal = apiAnalysis ? apiIssuesCount : localIssues.length;
 
-  if (isLoading && !report.measurements.length) {
+  if (isLoading && !all.length) {
     return (
       <div className="vh-page" style={{ textAlign: 'center', padding: '60px 20px' }}>
         <div className="vh-status vh-status--verify" style={{ fontSize: 16 }}>
@@ -85,10 +96,9 @@ export function Analyzer() {
     <div className="vh-page">
       <SynthBanner />
       <PageHead
-        eyebrow="Dashboard · Report Analyzer"
-        title="Extracted measurements"
-        lede="Each value is compared with the reference interval printed on the report. Select a row to see its source text and evidence receipt."
-        right={<ReportPicker reportId={reportId} setReportId={setReportId} />}
+        eyebrow="Dashboard · Read Your Report"
+        title="Your report, read out"
+        lede="Every test with its value, unit, and reference range. Select any row to see the exact source line it came from — or use the counts to focus on what needs attention."
       />
 
       {error && (
@@ -97,67 +107,72 @@ export function Analyzer() {
         </div>
       )}
 
-      <div className="vh-3col">
-        <aside className="vh-col vh-col--l">
-          <div className="vh-card">
-            <div className="vh-card__lbl">Report Details</div>
-            <div className="vh-meta">
-              <div className="vh-meta__t">{report.title}</div>
-              <div className="mono vh-meta__id" style={{ wordBreak: 'break-all' }}>
-                {report.id}
-              </div>
-              <dl className="vh-dl vh-dl--tight">
-                <dt>Subject</dt>
-                <dd>{report.patient}</dd>
-                <dt>Collected</dt>
-                <dd className="mono">{report.collected}</dd>
-                <dt>Lab</dt>
-                <dd>{report.lab}</dd>
-                <dt>Source</dt>
-                <dd className="mono" style={{ fontSize: 12 }}>
-                  {report.source}
-                </dd>
-              </dl>
-            </div>
+      <header className="vh-band">
+        <div className="vh-band__main">
+          <div className="vh-band__top">
+            <h2 className="vh-band__name">{report.title}</h2>
+            <span className="mono vh-band__id">{report.id}</span>
           </div>
-
-          <div className="vh-card">
-            <div className="vh-card__lbl">Upload New Report</div>
-            <UploadBox />
+          <div className="mono vh-band__meta">
+            {[
+              report.patient,
+              report.collected && `Collected ${report.collected}`,
+              report.lab,
+              report.source,
+            ]
+              .filter(Boolean)
+              .join('  ·  ')}
           </div>
-
-          <div className="vh-card vh-card--tally">
-            <div>
-              <b className="mono">{counts.out}</b>
-              <span>Outside range</span>
-            </div>
-            <div>
-              <b className="mono">{counts.verify}</b>
-              <span>Need verification</span>
-            </div>
-            <div>
-              <b className="mono">{counts.normal}</b>
-              <span>Within range</span>
-            </div>
-          </div>
-
           {issuesTotal > 0 && (
-            <button
-              className="vh-card vh-card--issues"
-              onClick={() => navigate('/dashboard/quality')}
-            >
+            <button className="vh-band__issues" onClick={() => navigate('/dashboard/quality')}>
               <span className="vh-flag vh-flag--danger vh-flag--sm">
                 <span className="vh-flag__g">!</span>
                 {issuesTotal} integrity issues
               </span>
-              <span>Review in Data Quality →</span>
+              <span>Review in Quality Check →</span>
             </button>
           )}
-        </aside>
+        </div>
 
-        <section className="vh-col vh-col--c">
-          <div className="vh-card vh-card--flush">
-            <table className="vh-tbl">
+        <div className="vh-band__tally">
+          <button
+            className={`vh-band__stat vh-band__stat--out ${filter === 'out' ? 'on' : ''}`}
+            onClick={() => selectStat('out')}
+            aria-pressed={filter === 'out'}
+          >
+            <b className="mono">{counts.out}</b>
+            <span>Outside range</span>
+          </button>
+          <button
+            className={`vh-band__stat vh-band__stat--verify ${filter === 'verify' ? 'on' : ''}`}
+            onClick={() => selectStat('verify')}
+            aria-pressed={filter === 'verify'}
+          >
+            <b className="mono">{counts.verify}</b>
+            <span>Need verification</span>
+          </button>
+          <button
+            className={`vh-band__stat vh-band__stat--ok ${filter === 'ok' ? 'on' : ''}`}
+            onClick={() => selectStat('ok')}
+            aria-pressed={filter === 'ok'}
+          >
+            <b className="mono">{counts.ok}</b>
+            <span>Within range</span>
+          </button>
+        </div>
+      </header>
+
+      <div className="vh-split">
+        <section className="vh-card vh-card--flush">
+          {visible.length === 0 ? (
+            <div className="vh-tbl__empty">
+              No tests match this filter.{' '}
+              <button className="vh-link" onClick={() => setFilter('all')}>
+                Show all tests
+              </button>
+            </div>
+          ) : (
+            <table className="vh-tbl vh-tbl--read">
               <thead>
                 <tr>
                   <th>Test Name</th>
@@ -211,19 +226,29 @@ export function Analyzer() {
                 </tbody>
               ))}
             </table>
-          </div>
+          )}
         </section>
 
-        <aside className="vh-col vh-col--r">
+        <aside className="vh-split__rail">
           <div className="vh-sticky">
-            <div className="vh-card__lbl vh-card__lbl--out">Evidence Receipt</div>
-            {m && <MeasurementReceipt m={m} report={report} flag={flags[m.id]} />}
-            <button
-              className="vh-btn vh-btn--ghost vh-btn--block"
-              onClick={() => navigate('/dashboard/patterns')}
-            >
-              See in Pattern Simulator →
-            </button>
+            <div className="vh-railstack">
+              {m && (
+                <div className="vh-railhead">
+                  <div className="vh-card__lbl">Evidence receipt · selected test</div>
+                  <MeasurementReceipt m={m} report={report} flag={flags[m.id]} />
+                </div>
+              )}
+              <div className="vh-railhead">
+                <div className="vh-card__lbl">Upload your own report</div>
+                <UploadBox />
+              </div>
+              <button
+                className="vh-btn vh-btn--ghost vh-btn--block"
+                onClick={() => navigate('/dashboard/patterns')}
+              >
+                See how findings connect →
+              </button>
+            </div>
           </div>
         </aside>
       </div>
@@ -255,9 +280,9 @@ export function DataQuality() {
     <div className="vh-page">
       <SynthBanner />
       <PageHead
-        eyebrow="Dashboard · Report Integrity Guardian"
-        title="Validate before you interpret"
-        lede="Checks run before any flag or relationship is computed. Veyra never fills in a missing unit or reference interval. Each issue is explained and held for a person to resolve."
+        eyebrow="Dashboard · Quality Check"
+        title="Checked before you see it"
+        lede="These checks run before any result is shown. If something is missing or unreadable, it is flagged for a person — never filled in automatically."
         right={<ReportPicker reportId={reportId} setReportId={setReportId} />}
       />
       <div className="vh-dq">
