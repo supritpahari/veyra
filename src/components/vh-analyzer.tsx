@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import type { Report, Analysis, IntegrityIssue } from '../types';
+import { useNavigate } from 'react-router-dom';
+import type { IntegrityIssue } from '../types';
 import { vhIntegrity, vhFmtRange } from '../data/vh-data';
+import { useVeyra } from '../context/VeyraContext';
 import { SynthBanner, PageHead, ReportPicker, FlagBadge, MeasurementReceipt, fmtVal } from './vh-ui';
 
 export function UploadBox() {
@@ -48,25 +50,10 @@ export function UploadBox() {
   );
 }
 
-export interface AnalyzerProps {
-  report: Report;
-  analysis: Analysis;
-  reportId: string;
-  setReportId: (id: string) => void;
-  sel: string;
-  setSel: (id: string) => void;
-  go: (route: string) => void;
-}
+export function Analyzer() {
+  const navigate = useNavigate();
+  const { report, analysis, reportId, setReportId, sel, setSel } = useVeyra();
 
-export function Analyzer({
-  report,
-  analysis,
-  reportId,
-  setReportId,
-  sel,
-  setSel,
-  go,
-}: AnalyzerProps) {
   const { flags } = analysis;
   const visible = report.measurements;
   const panels = [...new Set(visible.map(m => m.panel))];
@@ -84,7 +71,7 @@ export function Analyzer({
     <div className="vh-page">
       <SynthBanner />
       <PageHead
-        eyebrow="Report Analyzer"
+        eyebrow="Dashboard · Report Analyzer"
         title="Extracted measurements"
         lede="Each value is compared with the reference interval printed on the report. Select a row to see its source text and evidence receipt."
         right={<ReportPicker reportId={reportId} setReportId={setReportId} />}
@@ -130,7 +117,10 @@ export function Analyzer({
             </div>
           </div>
           {issues.length > 0 && (
-            <button className="vh-card vh-card--issues" onClick={() => go('quality')}>
+            <button
+              className="vh-card vh-card--issues"
+              onClick={() => navigate('/dashboard/quality')}
+            >
               <span className="vh-flag vh-flag--danger vh-flag--sm">
                 <span className="vh-flag__g">!</span>
                 {issues.length} integrity issues
@@ -205,7 +195,7 @@ export function Analyzer({
             <MeasurementReceipt m={m} report={report} flag={flags[m.id]} />
             <button
               className="vh-btn vh-btn--ghost vh-btn--block"
-              onClick={() => go('patterns')}
+              onClick={() => navigate('/dashboard/patterns')}
             >
               See related findings in graph →
             </button>
@@ -216,19 +206,10 @@ export function Analyzer({
   );
 }
 
-export function DataQuality({
-  report,
-  reportId,
-  setReportId,
-  setSel,
-  go,
-}: {
-  report: Report;
-  reportId: string;
-  setReportId: (id: string) => void;
-  setSel: (id: string) => void;
-  go: (route: string) => void;
-}) {
+export function DataQuality() {
+  const navigate = useNavigate();
+  const { report, reportId, setReportId, setSel } = useVeyra();
+
   const issues = vhIntegrity(report);
   const [resolved, setResolved] = useState<Record<string, boolean>>({});
   useEffect(() => setResolved({}), [reportId]);
@@ -266,10 +247,10 @@ export function DataQuality({
           className="vh-link"
           onClick={() => {
             setSel(i.mid);
-            go('analyzer');
+            navigate('/dashboard/analyzer');
           }}
         >
-          View source →
+          View source in Analyzer →
         </button>
         <button
           className="vh-btn vh-btn--sm vh-btn--ghost"
@@ -285,7 +266,7 @@ export function DataQuality({
     <div className="vh-page">
       <SynthBanner />
       <PageHead
-        eyebrow="Data Quality · Report Integrity Guardian"
+        eyebrow="Dashboard · Report Integrity Guardian"
         title="Validate before you interpret"
         lede="Checks run before any flag or relationship is computed. Veyra never fills in a missing unit or reference interval. Each issue is explained and held for a person to resolve."
         right={<ReportPicker reportId={reportId} setReportId={setReportId} />}
