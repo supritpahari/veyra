@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { vhIntegrity, vhFmtRange } from '../data/vh-data';
 import { useVeyra } from '../context/VeyraContext';
-import { SynthBanner, PageHead, ReportPicker, FlagBadge, MeasurementReceipt, fmtVal } from './vh-ui';
+import { SynthBanner, PageHead, ReportPicker, FlagBadge, MeasurementReceipt, NoReports, fmtVal } from './vh-ui';
 
 export function UploadBox() {
   const [state, setState] = useState<string | null>(null);
@@ -51,7 +51,7 @@ export function UploadBox() {
 
 export function Analyzer() {
   const navigate = useNavigate();
-  const { report, analysis, sel, setSel, isLoading, error, apiAnalysis } = useVeyra();
+  const { report, analysis, sel, setSel, isLoading, error, apiAnalysis, refreshReport } = useVeyra();
   const [filter, setFilter] = useState<'all' | 'out' | 'verify' | 'ok'>('all');
 
   const { flags } = analysis;
@@ -103,10 +103,14 @@ export function Analyzer() {
 
       {error && (
         <div className="vh-receipt__warn" style={{ marginBottom: 20 }}>
-          <strong>API Notice:</strong> {error}. Showing offline data mode.
+          <strong>API Notice:</strong> {error}. No reports are available until the API responds.
         </div>
       )}
 
+      {!all.length ? (
+        <NoReports onRefresh={refreshReport} />
+      ) : (
+      <>
       <header className="vh-band">
         <div className="vh-band__main">
           <div className="vh-band__top">
@@ -252,19 +256,35 @@ export function Analyzer() {
           </div>
         </aside>
       </div>
+      </>
+      )}
     </div>
   );
 }
 
 export function DataQuality() {
   const navigate = useNavigate();
-  const { report, reportId, setReportId, setSel, apiAnalysis } = useVeyra();
+  const { report, reportId, setReportId, setSel, apiAnalysis, refreshReport } = useVeyra();
 
   const [resolved, setResolved] = useState<Record<string, boolean>>({});
   useEffect(() => setResolved({}), [reportId]);
 
   // Use API quality issues when available, otherwise local rules
   const apiIssues = apiAnalysis?.qualityIssues || [];
+
+  if (!report.measurements.length) {
+    return (
+      <div className="vh-page">
+        <SynthBanner />
+        <PageHead
+          eyebrow="Dashboard · Quality Check"
+          title="Checked before you see it"
+          lede="These checks run before any result is shown. If something is missing or unreadable, it is flagged for a person — never filled in automatically."
+        />
+        <NoReports onRefresh={refreshReport} />
+      </div>
+    );
+  }
 
   const checks = [
     ['Missing units', apiIssues.some(i => i.code === 'missing_unit')],

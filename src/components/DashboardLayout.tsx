@@ -89,24 +89,32 @@ export function DashboardLayout() {
 
           {/* Active Case Selector Card */}
           <div className="vh-sidebar__case">
-            <div className="vh-sidebar__case-label">SAMPLE REPORTS</div>
+            <div className="vh-sidebar__case-label">REPORTS</div>
             <div className="vh-sidebar__case-selector">
-              {availableReports.map((r, i) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  className={`vh-case-btn ${r.id === reportId ? 'active' : ''}`}
-                  onClick={() => setReportId(r.id)}
-                  title={r.title}
-                >
-                  <span className="mono">Sample {String.fromCharCode(65 + i)}</span>
-                </button>
-              ))}
+              {availableReports.length === 0 ? (
+                <span className="vh-sidebar__empty">None loaded yet</span>
+              ) : (
+                availableReports.map((r, i) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    className={`vh-case-btn ${r.id === reportId ? 'active' : ''}`}
+                    onClick={() => setReportId(r.id)}
+                    title={r.title}
+                  >
+                    <span className="mono">{r.title || `Report ${i + 1}`}</span>
+                  </button>
+                ))
+              )}
             </div>
             <div className="vh-sidebar__case-info">
-              <div className="vh-sidebar__case-name">{report.title}</div>
+              <div className="vh-sidebar__case-name">
+                {report.id ? report.title : 'No report loaded'}
+              </div>
               <div className="vh-sidebar__case-sub">
-                {report.measurements.length} tests · {report.source}
+                {report.measurements.length
+                  ? `${report.measurements.length} tests · ${report.source}`
+                  : 'Connect the API to load reports'}
               </div>
             </div>
           </div>

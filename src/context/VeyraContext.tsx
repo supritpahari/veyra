@@ -8,7 +8,7 @@ import type {
   Measurement,
   FlagType,
 } from '../types';
-import { VH_REPORTS, vhAnalyze } from '../data/vh-data';
+import { vhAnalyze } from '../data/vh-data';
 import { api } from '../services/api';
 
 export interface VeyraContextValue {
@@ -30,6 +30,20 @@ export interface VeyraContextValue {
 }
 
 const VeyraContext = createContext<VeyraContextValue | null>(null);
+
+// No sample data ships with the app. Everything is loaded from the API;
+// until a report arrives, the context holds this empty skeleton and the
+// pages render their "no reports" states.
+const EMPTY_REPORT: Report = {
+  id: '',
+  title: 'No report loaded',
+  patient: '',
+  collected: '',
+  lab: '',
+  source: '',
+  measurements: [],
+  edges: [],
+};
 
 function mapApiToUiReport(apiData: ApiReportAnalysis, reportMeta?: { title?: string; id: string }): Report {
   const positions: [number, number][] = [
@@ -96,9 +110,7 @@ export function VeyraProvider({ children }: { children: React.ReactNode }) {
     };
   });
 
-  const [availableReports, setAvailableReports] = useState<{ id: string; title: string; sourceType: string }[]>(() =>
-    VH_REPORTS.map(r => ({ id: r.id, title: r.title, sourceType: 'synthetic' }))
-  );
+  const [availableReports, setAvailableReports] = useState<{ id: string; title: string; sourceType: string }[]>([]);
 
   const [reportId, setReportIdState] = useState<string>(() => {
     try {
@@ -109,7 +121,7 @@ export function VeyraProvider({ children }: { children: React.ReactNode }) {
   });
 
   const [apiAnalysis, setApiAnalysis] = useState<ApiReportAnalysis | null>(null);
-  const [currentReport, setCurrentReport] = useState<Report>(VH_REPORTS[0]);
+  const [currentReport, setCurrentReport] = useState<Report>(EMPTY_REPORT);
   const [sel, setSel] = useState<string>('11111111-aaaa-4111-8111-111111111111');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -128,7 +140,7 @@ export function VeyraProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (err: any) {
-      console.warn('Backend connection warning; using fallback dataset:', err);
+      console.warn('Backend not reachable; reports will stay empty until it is:', err);
       setIsBackendConnected(false);
     }
   }, [reportId]);
@@ -153,16 +165,10 @@ export function VeyraProvider({ children }: { children: React.ReactNode }) {
         setSel(mappedReport.measurements[0].id);
       }
     } catch (err: any) {
-      console.warn(`Failed to fetch report ${id} from API, falling back to local demo:`, err);
+      console.warn(`Failed to fetch report ${id} from API:`, err);
       setError(err.message || 'Failed to load report from API');
       setIsBackendConnected(false);
-
-      // Graceful fallback to static reports
-      const local = VH_REPORTS.find(r => r.id === id) || VH_REPORTS[0];
-      setCurrentReport(local);
-      if (local.measurements.length > 0) {
-        setSel(local.measurements[0].id);
-      }
+      setCurrentReport(EMPTY_REPORT);
     } finally {
       setIsLoading(false);
     }

@@ -65,7 +65,7 @@ export function SynthBanner({ children }: { children?: React.ReactNode }) {
   return (
     <div className="vh-synth">
       <span className="vh-synth__tag">
-        {apiAnalysis?.sourceType?.toUpperCase() || 'SYNTHETIC'} DATA
+        {apiAnalysis?.sourceType?.toUpperCase() || 'OFFLINE'} DATA
       </span>
       <span>
         {children ||
@@ -127,6 +127,8 @@ export function ReportPicker({
 }) {
   const { availableReports } = useVeyra();
 
+  if (!availableReports.length) return null;
+
   return (
     <div className="vh-seg" role="tablist">
       {availableReports.map((r, i) => (
@@ -138,9 +140,31 @@ export function ReportPicker({
           onClick={() => setReportId(r.id)}
           title={r.title}
         >
-          <span className="mono">Sample {String.fromCharCode(65 + i)}</span>
+          <span className="mono">{r.title || `Report ${i + 1}`}</span>
         </button>
       ))}
+    </div>
+  );
+}
+
+export function NoReports({ onRefresh }: { onRefresh?: () => void }) {
+  const { isBackendConnected } = useVeyra();
+  const label = isBackendConnected ? 'No reports yet' : 'API not connected';
+  return (
+    <div className="vh-card" style={{ padding: '36px 24px', textAlign: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div className="vh-card__lbl">{label}</div>
+      </div>
+      <p style={{ margin: '10px auto 0', maxWidth: 460, color: 'var(--ink2)', fontSize: 13.5, lineHeight: 1.65 }}>
+        {isBackendConnected
+          ? 'The backend answered, but it has no reports stored yet. Seed data on the server, then refresh.'
+          : 'Veyra reads every report from its API. Start the backend and make sure it is reachable, then refresh.'}
+      </p>
+      {onRefresh && (
+        <button className="vh-btn vh-btn--sm vh-btn--ghost" style={{ marginTop: 16 }} onClick={onRefresh}>
+          Refresh
+        </button>
+      )}
     </div>
   );
 }

@@ -2385,6 +2385,19 @@ h1, h2, h3, h4 {
   transition: all 0.15s ease;
 }
 
+.vh-case-btn span {
+  display: block;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vh-sidebar__empty {
+  font-size: 12px;
+  color: var(--ink3);
+}
+
 .vh-case-btn:hover {
   background: var(--accent-soft);
   color: var(--accent);

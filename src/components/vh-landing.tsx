@@ -12,7 +12,27 @@ export function HeroSpecimen() {
   const activeId = sel || (rows[0]?.id ?? '');
   const m = rows.find(x => x.id === activeId) || rows[0];
 
-  if (!m) return null;
+  if (!m) {
+    return (
+      <div className="vh-spec vh-spec--empty">
+        <div className="vh-spec__body" style={{ display: 'block', padding: '52px 24px', textAlign: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div className="vh-card__lbl">Live specimen</div>
+          </div>
+          <p style={{ margin: '12px auto 0', maxWidth: 300, color: 'var(--ink2)', fontSize: 13, lineHeight: 1.6 }}>
+            The specimen appears here once the app loads a report from the Veyra API. Start the backend, then open the dashboard.
+          </p>
+          <button
+            className="vh-btn vh-btn--sm vh-btn--ghost"
+            style={{ marginTop: 16 }}
+            onClick={() => navigate('/dashboard/analyzer')}
+          >
+            Open the dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="vh-spec">
@@ -21,7 +41,7 @@ export function HeroSpecimen() {
         <span>·</span>
         <span>{report.source}</span>
         <span className="vh-spec__live">
-          <i />Sample report
+          <i />Live report
         </span>
       </div>
       <div className="vh-spec__body">
@@ -73,7 +93,7 @@ export function Landing() {
   const navigate = useNavigate();
 
   const steps = [
-    ['01', 'Upload a report', 'Pick a PDF or photo of a lab printout. A few synthetic samples are ready so you can try it right away.'],
+    ['01', 'Upload a report', 'Pick a PDF or photo of a lab printout. Reports are loaded through the Veyra API — connect it to explore a case.'],
     ['02', 'Understand it', 'Every test is read out in plain language: the value, the healthy range, whether it is in range, and what it connects to.'],
     ['03', 'Check it', 'Every claim shows the exact source line and rule behind it, so you can verify it against your own report.'],
   ];
@@ -221,8 +241,8 @@ export function Landing() {
       {/* CTA Section */}
       <section className="vh-cta">
         <div>
-          <h2 className="vh-h2">Try it with a sample report.</h2>
-          <p style={{ margin: '8px 0 0', opacity: 0.85 }}>No sign-up and no real patient data — synthetic cases only.</p>
+          <h2 className="vh-h2">Connect the API and open a report.</h2>
+          <p style={{ margin: '8px 0 0', opacity: 0.85 }}>No sign-up and no real patient data — reports come from your configured backend.</p>
         </div>
         <div className="vh-hero__ctas">
           <button className="vh-btn vh-btn--onDark" onClick={() => navigate('/dashboard/analyzer')}>

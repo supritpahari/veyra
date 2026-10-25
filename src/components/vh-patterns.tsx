@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { Report, Analysis, ApiSimulationResult, FlagType } from '../types';
 import { VH_FLAG_META, vhFmtRange } from '../data/vh-data';
 import { useVeyra } from '../context/VeyraContext';
-import { SynthBanner, PageHead, ReportPicker, FlagBadge, MeasurementReceipt, Eyebrow } from './vh-ui';
+import { SynthBanner, PageHead, ReportPicker, FlagBadge, MeasurementReceipt, Eyebrow, NoReports } from './vh-ui';
 
 const VH_GW = 800,
   VH_GH = 520;
@@ -98,7 +98,7 @@ export function PatternGraph({
 }
 
 export function PatternExplorer() {
-  const { report, analysis, reportId, setReportId, sel, runSimulation, apiAnalysis } = useVeyra();
+  const { report, analysis, reportId, setReportId, sel, runSimulation, apiAnalysis, refreshReport } = useVeyra();
 
   const [focus, setFocus] = useState<FocusTarget | null>(null);
   const simmable = report.measurements.filter(m => m.sim && !m.hidden);
@@ -131,6 +131,20 @@ export function PatternExplorer() {
   const simM = report.measurements.find(m => m.id === simId) || simmable[0];
   const curVal = simVal == null ? (simM?.value ?? 0) : simVal;
   const isMod = simM ? curVal !== simM.value : false;
+
+  if (!report.measurements.length) {
+    return (
+      <div className="vh-page">
+        <SynthBanner />
+        <PageHead
+          eyebrow="Dashboard · See Connections"
+          title="How findings connect"
+          lede="What the values suggest together, joined by rules you can open and read. Suggestions from the model are labeled separately."
+        />
+        <NoReports onRefresh={refreshReport} />
+      </div>
+    );
+  }
 
   // Trigger backend simulation via POST /api/v1/reports/:reportId/simulations
   const handleSliderChange = (newVal: number) => {
