@@ -194,6 +194,9 @@ export const VH_FLAG_META: Record<FlagType, FlagMetaItem> = {
   low: { label: 'Below range', short: 'Low', glyph: '↓', tone: 'alert' },
   high: { label: 'Above range', short: 'High', glyph: '↑', tone: 'alert' },
   normal: { label: 'Within range', short: 'In range', glyph: '✓', tone: 'ok' },
+  in_range: { label: 'Within range', short: 'In range', glyph: '✓', tone: 'ok' },
   verify: { label: 'Needs verification', short: 'Verify', glyph: '?', tone: 'verify' },
+  needs_verification: { label: 'Needs verification', short: 'Verify', glyph: '?', tone: 'verify' },
   conflict: { label: 'Conflicting values', short: 'Conflict', glyph: '!', tone: 'danger' },
 };
+
