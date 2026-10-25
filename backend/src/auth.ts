@@ -297,7 +297,7 @@ router.post(
 router.get(
   '/google',
   authRateLimit,
-  async (_request, response) => {
+  async (request, response) => {
     if (!config.GOOGLE_CLIENT_ID || !config.GOOGLE_CLIENT_SECRET) {
       response
         .status(503)
@@ -317,6 +317,10 @@ router.get(
     response.cookie(oauthStateCookieName, state, oauthCookieOptions)
     response.cookie(oauthNonceCookieName, nonce, oauthCookieOptions)
     response.cookie(oauthVerifierCookieName, verifier, oauthCookieOptions)
+    if (request.query.format === 'json') {
+      response.json({ data: { authorizationUrl: redirectUrl } })
+      return
+    }
     response.redirect(302, redirectUrl)
   },
 )
