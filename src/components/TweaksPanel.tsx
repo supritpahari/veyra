@@ -1,12 +1,9 @@
 import { useState } from 'react';
-import type { TweaksState, ThemeType, FontType } from '../types';
+import type { ThemeType, FontType } from '../types';
+import { useVeyra } from '../context/VeyraContext';
 
-interface TweaksPanelProps {
-  tweaks: TweaksState;
-  onChange: (key: keyof TweaksState, val: string) => void;
-}
-
-export function TweaksPanel({ tweaks, onChange }: TweaksPanelProps) {
+export function TweaksPanel() {
+  const { tweaks, setTweak } = useVeyra();
   const [open, setOpen] = useState(false);
 
   const themeOptions: { value: ThemeType; label: string }[] = [
@@ -66,7 +63,7 @@ export function TweaksPanel({ tweaks, onChange }: TweaksPanelProps) {
                     role="radio"
                     aria-checked={tweaks.theme === opt.value}
                     className={tweaks.theme === opt.value ? 'active' : ''}
-                    onClick={() => onChange('theme', opt.value)}
+                    onClick={() => setTweak('theme', opt.value)}
                   >
                     {opt.label}
                   </button>
@@ -88,7 +85,7 @@ export function TweaksPanel({ tweaks, onChange }: TweaksPanelProps) {
                       role="radio"
                       aria-checked={tweaks.accent === c}
                       style={{ background: c }}
-                      onClick={() => onChange('accent', c)}
+                      onClick={() => setTweak('accent', c)}
                     >
                       {tweaks.accent === c && (
                         <svg viewBox="0 0 12 12" width="10" height="10" fill="white">
@@ -114,7 +111,7 @@ export function TweaksPanel({ tweaks, onChange }: TweaksPanelProps) {
                     role="radio"
                     aria-checked={tweaks.font === opt.value}
                     className={tweaks.font === opt.value ? 'active' : ''}
-                    onClick={() => onChange('font', opt.value)}
+                    onClick={() => setTweak('font', opt.value)}
                   >
                     {opt.label}
                   </button>
