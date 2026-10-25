@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { FlagType } from '../types';
 import { SynthBanner, PageHead, FlagBadge, KindTag } from './vh-ui';
 
@@ -99,7 +100,7 @@ export function AILab() {
         Experimental workspace. Nothing on this page is a real training run unless it is marked Ready.
       </SynthBanner>
       <PageHead
-        eyebrow="AI Lab · Synthetic Patient Laboratory"
+        eyebrow="Dashboard · AI Lab · Synthetic Patient Laboratory"
         title="Dataset to model, out in the open"
         lede="Generate structured synthetic lab cases, validate them, split them with no leakage between train and held-out sets, and train with Adaption Labs. Every step shows its real status."
       />
@@ -214,7 +215,8 @@ export function AILab() {
   );
 }
 
-export function Evaluation({ go }: { go: (route: string) => void }) {
+export function Evaluation() {
+  const navigate = useNavigate();
   const metrics = ['Precision', 'Recall', 'F1 score', 'False-positive rate', 'Abstention rate'];
   const receipts = [
     ['Range flag', 'Ferritin 8 ng/mL is below the stated range of 15–150', 'deterministic', 'Report line 22 · printed reference interval'],
@@ -228,7 +230,7 @@ export function Evaluation({ go }: { go: (route: string) => void }) {
     <div className="vh-page">
       <SynthBanner />
       <PageHead
-        eyebrow="Evaluation & Evidence"
+        eyebrow="Dashboard · Evaluation & Evidence"
         title="Measured honestly, with limits stated"
         lede="The model is compared with a simple baseline on held-out synthetic cases. Until a run actually finishes, each metric shows its real status instead of a number."
       />
@@ -284,7 +286,7 @@ export function Evaluation({ go }: { go: (route: string) => void }) {
               </li>
             ))}
           </ul>
-          <button className="vh-link" onClick={() => go('patterns')}>
+          <button className="vh-link" onClick={() => navigate('/dashboard/patterns')}>
             Inspect in Pattern Explorer →
           </button>
         </div>

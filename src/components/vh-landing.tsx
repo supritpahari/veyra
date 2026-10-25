@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { VH_REPORTS, vhAnalyze, vhFmtRange, vhVerifyReason } from '../data/vh-data';
 import { Eyebrow, FlagBadge, KindTag, fmtVal } from './vh-ui';
 
-export function HeroSpecimen({ go }: { go: (route: string) => void }) {
+export function HeroSpecimen() {
+  const navigate = useNavigate();
   const r = VH_REPORTS[0];
   const { flags } = vhAnalyze(r);
   const rows = ['hgb', 'mcv', 'ferr', 'iron', 'tibc', 'b12', 'tsh']
@@ -18,7 +20,7 @@ export function HeroSpecimen({ go }: { go: (route: string) => void }) {
         <span>·</span>
         <span>{r.source}</span>
         <span className="vh-spec__live">
-          <i />Live demo
+          <i />Live specimen
         </span>
       </div>
       <div className="vh-spec__body">
@@ -59,14 +61,16 @@ export function HeroSpecimen({ go }: { go: (route: string) => void }) {
           )}
         </div>
       </div>
-      <button className="vh-spec__cta" onClick={() => go('analyzer')}>
-        Open the full analysis →
+      <button className="vh-spec__cta" onClick={() => navigate('/dashboard/analyzer')}>
+        Open in Dashboard Analyzer →
       </button>
     </div>
   );
 }
 
-export function Landing({ go }: { go: (route: string) => void }) {
+export function Landing() {
+  const navigate = useNavigate();
+
   const steps = [
     ['01', 'Extract', 'PDF or image in. Out come test names, values, units, dates, and reference ranges, with every value tied to its source line.'],
     ['02', 'Validate', 'Before anything is interpreted, the Integrity Guardian checks for missing units, absent ranges, duplicate tests, and unreadable text.'],
@@ -75,18 +79,19 @@ export function Landing({ go }: { go: (route: string) => void }) {
     ['05', 'Inspect', 'Every output comes with a receipt: the measurement, unit, range, rule, and whether it came from rules or a model.'],
   ];
 
-  const caps = [
-    ['analyzer', 'Report Analyzer', 'Structured extraction with per-value source text and extraction confidence.'],
-    ['patterns', 'Hidden Pattern Graph', 'Measurements as nodes and relationships as edges. Select an edge to see why it is there.'],
-    ['patterns', 'One-Value-Changed', 'Change one synthetic value and see exactly which flags and edges change.'],
-    ['evaluation', 'Evidence Receipts', 'Every claim points back to a measurement, rule, or source, or is marked unverified.'],
-    ['lab', 'Synthetic Patient Lab', 'Generate synthetic cases, keep held-out splits free of leakage, and track training runs.'],
-    ['quality', 'Uncertainty Engine', 'The system abstains when information is missing. It uses qualitative labels until confidence is calibrated.'],
-    ['quality', 'Integrity Guardian', 'Explains each data-quality issue and suggests a fix. It never fills in a missing unit or range.'],
+  const caps: [string, string, string][] = [
+    ['/dashboard/analyzer', 'Report Analyzer', 'Structured extraction with per-value source text and extraction confidence.'],
+    ['/dashboard/patterns', 'Hidden Pattern Graph', 'Measurements as nodes and relationships as edges. Select an edge to see why it is there.'],
+    ['/dashboard/patterns', 'One-Value-Changed', 'Change one synthetic value and see exactly which flags and edges change.'],
+    ['/dashboard/evaluation', 'Evidence Receipts', 'Every claim points back to a measurement, rule, or source, or is marked unverified.'],
+    ['/dashboard/lab', 'Synthetic Patient Lab', 'Generate synthetic cases, keep held-out splits free of leakage, and track training runs.'],
+    ['/dashboard/quality', 'Uncertainty Engine', 'The system abstains when information is missing. It uses qualitative labels until confidence is calibrated.'],
+    ['/dashboard/quality', 'Integrity Guardian', 'Explains each data-quality issue and suggests a fix. It never fills in a missing unit or range.'],
   ];
 
   return (
     <div className="vh-landing">
+      {/* Hero Section */}
       <section className="vh-hero">
         <div className="vh-hero__l">
           <Eyebrow>Evidence-first lab report analysis · Hackathon prototype</Eyebrow>
@@ -98,11 +103,17 @@ export function Landing({ go }: { go: (route: string) => void }) {
             Veyra Health turns raw lab reports into structured, explainable findings, each with a receipt. You see what was flagged, the exact measurement, unit, range, and rule behind it, and how sure the system is.
           </p>
           <div className="vh-hero__ctas">
-            <button className="vh-btn vh-btn--primary" onClick={() => go('analyzer')}>
-              Load sample report
+            <button
+              className="vh-btn vh-btn--primary"
+              onClick={() => navigate('/dashboard/analyzer')}
+            >
+              Launch Dashboard
             </button>
-            <button className="vh-btn vh-btn--ghost" onClick={() => go('patterns')}>
-              Explore the pattern graph
+            <button
+              className="vh-btn vh-btn--ghost"
+              onClick={() => navigate('/dashboard/patterns')}
+            >
+              Explore Pattern Graph
             </button>
           </div>
           <div className="vh-hero__fine">
@@ -110,10 +121,11 @@ export function Landing({ go }: { go: (route: string) => void }) {
           </div>
         </div>
         <div className="vh-hero__r">
-          <HeroSpecimen go={go} />
+          <HeroSpecimen />
         </div>
       </section>
 
+      {/* The Problem Section */}
       <section className="vh-sec">
         <div className="vh-sec__head">
           <Eyebrow>The problem</Eyebrow>
@@ -148,6 +160,7 @@ export function Landing({ go }: { go: (route: string) => void }) {
         </div>
       </section>
 
+      {/* Workflow Section */}
       <section className="vh-sec vh-sec--flow">
         <div className="vh-sec__head">
           <Eyebrow>Workflow</Eyebrow>
@@ -164,20 +177,21 @@ export function Landing({ go }: { go: (route: string) => void }) {
         </ol>
       </section>
 
+      {/* Capabilities Section */}
       <section className="vh-sec">
         <div className="vh-sec__head vh-sec__head--row">
           <div>
-            <Eyebrow>Capabilities</Eyebrow>
-            <h2 className="vh-h2">Seven parts. Every one can be inspected.</h2>
+            <Eyebrow>Dashboard Capabilities</Eyebrow>
+            <h2 className="vh-h2">Interactive tools available in the workspace.</h2>
           </div>
         </div>
         <div className="vh-caps">
-          {caps.map(([to, t, d], i) => (
-            <button key={t} className="vh-cap" onClick={() => go(to)}>
+          {caps.map(([route, t, d], i) => (
+            <button key={t} className="vh-cap" onClick={() => navigate(route)}>
               <span className="mono vh-cap__n">{String(i + 1).padStart(2, '0')}</span>
               <h3>{t}</h3>
               <p>{d}</p>
-              <span className="vh-cap__go">Open →</span>
+              <span className="vh-cap__go">Open in Dashboard →</span>
             </button>
           ))}
           <div className="vh-cap vh-cap--img">
@@ -188,6 +202,7 @@ export function Landing({ go }: { go: (route: string) => void }) {
         </div>
       </section>
 
+      {/* Safety & Honesty Section */}
       <section className="vh-sec vh-honest">
         <div className="vh-honest__l">
           <Eyebrow>Safety &amp; honesty</Eyebrow>
@@ -212,17 +227,23 @@ export function Landing({ go }: { go: (route: string) => void }) {
         </ul>
       </section>
 
+      {/* CTA Section */}
       <section className="vh-cta">
-        <h2 className="vh-h2">Inspect a synthetic report.</h2>
+        <div>
+          <h2 className="vh-h2">Inspect a synthetic report.</h2>
+          <p style={{ margin: '8px 0 0', opacity: 0.85 }}>Access the full clinical inspection suite in the dashboard.</p>
+        </div>
         <div className="vh-hero__ctas">
-          <button className="vh-btn vh-btn--onDark" onClick={() => go('analyzer')}>
-            Start the demo
+          <button className="vh-btn vh-btn--onDark" onClick={() => navigate('/dashboard/analyzer')}>
+            Open Dashboard
           </button>
-          <button className="vh-btn vh-btn--ghostDark" onClick={() => go('evaluation')}>
-            See evaluation &amp; limits
+          <button className="vh-btn vh-btn--ghostDark" onClick={() => navigate('/dashboard/evaluation')}>
+            See Evaluation &amp; Limits
           </button>
         </div>
       </section>
+
+      {/* Footer */}
       <footer className="vh-foot">
         <span>
           <b>Veyra Health</b> · Hackathon prototype · 2026

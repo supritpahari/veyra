@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { Report, Analysis, Edge, Measurement } from '../types';
 import { VH_FLAG_META, VH_RULESET, VH_REPORTS, vhAnalyze, vhFmtRange } from '../data/vh-data';
+import { useVeyra } from '../context/VeyraContext';
 import { SynthBanner, PageHead, ReportPicker, FlagBadge, KindTag, MeasurementReceipt, Eyebrow, fmtVal } from './vh-ui';
 
 const VH_GW = 800,
@@ -243,20 +244,9 @@ export function EdgePanel({
   );
 }
 
-export function PatternExplorer({
-  report,
-  analysis,
-  reportId,
-  setReportId,
-  sel,
-}: {
-  report: Report;
-  analysis: Analysis;
-  reportId: string;
-  setReportId: (id: string) => void;
-  sel: string;
-  setSel?: (id: string) => void;
-}) {
+export function PatternExplorer() {
+  const { report, analysis, reportId, setReportId, sel } = useVeyra();
+
   const [focus, setFocus] = useState<FocusTarget | null>(null);
   const simmable = report.measurements.filter(m => m.sim && !m.hidden);
   const [simId, setSimId] = useState(simmable[0]?.id || 'ferr');
@@ -315,7 +305,7 @@ export function PatternExplorer({
     <div className="vh-page">
       <SynthBanner />
       <PageHead
-        eyebrow="Pattern Explorer"
+        eyebrow="Dashboard · Pattern Explorer"
         title="Hidden Pattern Graph"
         lede="Nodes are measurements and edges are relationships. Select a node to highlight related findings, or an edge to see why it's shown."
         right={<ReportPicker reportId={reportId} setReportId={setReportId} />}
