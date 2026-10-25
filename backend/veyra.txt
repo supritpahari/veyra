@@ -1,0 +1,121 @@
+Project Name: Veyra Health
+Tagline: Medical insights you can inspect.
+
+PRODUCT OVERVIEW
+Veyra Health is an evidence-first medical laboratory report analysis platform designed to transform raw laboratory results into structured, explainable, and auditable insights. It extracts test names, values, units, dates, and reference ranges; checks data quality; highlights results outside their stated reference intervals; and presents potentially related findings in an interactive visual graph.
+
+The product is a hackathon prototype for clinical decision support. It is not a diagnostic system and must not replace advice from qualified healthcare professionals.
+
+PRODUCT GOALS
+1. Make laboratory reports easier to inspect and understand.
+2. Identify abnormal values using the reference ranges supplied by the report or verified source.
+3. Show relationships between findings with evidence and uncertainty clearly represented.
+4. Detect missing, ambiguous, inconsistent, or potentially invalid report data.
+5. Demonstrate meaningful use of Adaption Labs for synthetic dataset generation and model training or optimization, subject to the platform's available tools and credits.
+6. Evaluate the model against a simple baseline using held-out synthetic cases.
+
+CORE FEATURES
+
+1. INTELLIGENT REPORT ANALYZER
+Users can upload a supported laboratory report, initially PDF or image, or load a prepared synthetic example. The application extracts test names, measured values, units, dates, and reference ranges. It normalizes recognized test names and performs unit conversions only when the conversion is known to be valid. Each result is compared with the appropriate reference range.
+
+Every measurement should be inspectable. Selecting a result reveals the extracted source text, value, unit, reference interval, and any extraction uncertainty. If a test, unit, or range cannot be identified reliably, the system marks it for verification instead of guessing.
+
+2. HIDDEN PATTERN GRAPH
+The main signature feature is an interactive graph of laboratory measurements and relevant relationships. Nodes represent measurements or findings; edges represent predefined, evidence-supported relationships or patterns suggested by the model. Selecting a node highlights related findings. Selecting an edge explains why the relationship is shown and identifies the supporting measurements, rule, or evidence source.
+
+The interface distinguishes:
+- Observed: directly extracted information from the report.
+- Associated: findings connected by configured evidence or rules.
+- Inferred: model-generated suggestions, with uncertainty and limitations.
+
+The graph must not present an association as a diagnosis or claim causation without evidence.
+
+3. ONE-VALUE-CHANGED SIMULATOR
+Users can change a value in a synthetic report and compare the original analysis with the modified analysis. The application recalculates deterministic reference-range flags, updates relevant graph elements, and shows which outputs changed.
+
+The interface clearly separates rule-based changes from model predictions. It must not imply that changing one laboratory value predicts a real patient's clinical outcome.
+
+4. EVIDENCE RECEIPTS
+Every important finding or explanation links back to the relevant measurement, unit, reference range, configured rule, or evidence source. The interface identifies whether a result comes from deterministic logic or a machine-learning model. Claims that cannot be verified from the available evidence are marked as unverified.
+
+5. SYNTHETIC PATIENT LABORATORY
+Provide an experimental workspace to create and test synthetic laboratory cases. Use Adaption Labs' available dataset-generation tools, such as Invent-a-Dataset if accessible, to produce varied, structured examples. Potential fields include test names, values, units, reference intervals, quality issues, and expected outputs based on reviewed rules.
+
+Validate the generated records, separate training data from held-out evaluation data, and avoid near-duplicate leakage between splits. Use the available Adaption training or optimization workflow only after verifying its supported inputs, model types, runtime, and credit requirements.
+
+The workspace should display dataset size, training status, evaluation-set size, metrics, example predictions, and model limitations. Never fabricate a training run or present baseline results as results from an Adaption-trained model.
+
+6. UNCERTAINTY ENGINE
+The system should flag unfamiliar tests, ambiguous units, missing ranges, low-confidence extraction, unsupported cases, and insufficient information. It should abstain from unsupported predictions and request human review. Only show numerical confidence as a probability if it has been appropriately calibrated; otherwise use clear qualitative labels such as 'Needs verification' or 'Insufficient information'.
+
+7. REPORT INTEGRITY GUARDIAN
+Before interpretation, validate the report for missing units, absent or ambiguous ranges, duplicate measurements, conflicting values, unsupported conversions, unreadable text, and suspiciously invalid records. Explain each issue and suggest a correction. Never silently guess a missing unit or reference interval.
+
+WEBSITE STRUCTURE
+- Overview: product introduction, workflow, capabilities, and sample-analysis entry point.
+- Report Analyzer: upload or select a synthetic report, inspect extracted values, and review findings.
+- Pattern Explorer: interactive graph, evidence panels, and one-value-changed simulator.
+- AI Lab: synthetic data generation, training status, experiment history, and evaluation.
+- Data Quality: extraction problems, inconsistencies, missing units, and unresolved ambiguities.
+- Evaluation & Evidence: metrics, baseline comparison, held-out cases, traceable explanations, and limitations.
+
+MAIN ANALYSIS SCREEN
+Use a responsive dashboard layout:
+- Left panel: report navigation and list of measurements.
+- Center panel: relationship graph and findings.
+- Right panel: evidence, explanations, and uncertainty.
+On small screens, stack the panels vertically. Keep the demo flow usable even if file upload or model training is unavailable by providing clearly labeled synthetic sample cases.
+
+DESIGN SYSTEM
+The visual identity should feel like trustworthy, modern clinical software rather than a generic chatbot. Use a clean layout, generous spacing, readable tables, and subtle transitions.
+Suggested palette:
+- Deep Navy: #102A43
+- Clinical Teal: #0F766E
+- Cloud: #F8FAFC
+Use red and amber only for meaningful alerts, with text labels so status is not communicated by color alone. Suggested typography: Inter or Geist.
+
+SUGGESTED TECH STACK
+- Frontend: React, Vite, TypeScript
+- Styling: Tailwind CSS
+- Graph visualization: React Flow or Cytoscape.js
+- PDF extraction: PDF.js
+- Image OCR: a suitable browser OCR library or available OCR service
+- Data validation: explicit schemas and deterministic rules
+- Dataset generation and model training: Adaption Labs tools verified during the hackathon
+- Persistence: in-memory demo data first; add a backend only if required
+- Deployment: Vercel or another available host
+
+Keep any secret API credentials on a server-side endpoint. Never expose private credentials in frontend code.
+
+MODEL EVALUATION
+Compare the model with a reasonable deterministic or simple baseline on held-out synthetic cases. Report relevant metrics such as precision, recall, F1 score, false-positive rate, and abstention rate when applicable. Explain the dataset and evaluation method. Synthetic evaluation demonstrates performance on synthetic cases only and does not establish clinical validity or performance on real patients.
+
+THREE-HOUR BUILD PLAN
+0-25 minutes: Set up the project, dashboard shell, navigation, and synthetic sample reports.
+25-60 minutes: Implement structured measurements, reference-range checks, data-quality validation, and evidence records.
+60-105 minutes: Generate a small dataset and start the Adaption experiment as early as possible; continue frontend work while it runs.
+105-145 minutes: Build the Hidden Pattern Graph, evidence panel, and one-value-changed simulator.
+145-165 minutes: Integrate actual model output if available, verify metrics, and ensure the baseline works.
+165-180 minutes: Test the full demo, fix visible bugs, and prepare the presentation.
+This is a target schedule, not a guarantee that model training will finish. If training takes too long, keep the baseline functional and clearly label its status.
+
+DEMO STORY
+1. Explain that laboratory reports can contain many measurements and isolated flags do not communicate every relationship.
+2. Load a synthetic report and show extraction plus data-quality validation.
+3. Open the Hidden Pattern Graph and inspect the evidence for a relationship.
+4. Change one synthetic measurement and compare the outputs.
+5. Show the Adaption dataset-generation and model-training workflow, if completed.
+6. Compare actual model results with the baseline on held-out synthetic cases.
+7. Explain uncertainty, limitations, and the need for professional medical review.
+
+SAFETY AND HONESTY REQUIREMENTS
+- Use synthetic or properly authorized data for the hackathon demo.
+- Do not claim the prototype diagnoses, treats, or predicts real patient outcomes.
+- Do not invent medical relationships, evidence, or evaluation metrics.
+- Preserve units and reference intervals and flag ambiguity.
+- Clearly label synthetic data, model status, and limitations.
+- Present the product as a prototype for supporting review by qualified healthcare professionals.
+
+PRODUCT SUMMARY
+Veyra Health is an evidence-first medical laboratory report analysis prototype that combines report extraction, data-quality validation, interactive exploration of potentially related findings, counterfactual testing, and an Adaption-powered dataset-to-model workflow. Its defining promise is that users can inspect not only what the system reports, but also the measurements, rules, uncertainty, and evaluation evidence behind its outputs.
