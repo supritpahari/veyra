@@ -1,14 +1,30 @@
-import { Router } from 'express'
+import express, { Router } from 'express'
+import { rateLimit } from 'express-rate-limit'
 import type {
   Measurement as PrismaMeasurement,
   Report as PrismaReport,
 } from '@prisma/client'
 import { z } from 'zod'
 import { analyzeMeasurements } from './analysis.js'
+import { requireAuthentication } from './auth-middleware.js'
 import { prisma } from './db.js'
+import { extractPdfReport, PdfExtractionError } from './pdf-extraction.js'
 import type { Measurement, Report } from './types.js'
 
 const router = Router()
+const pdfUploadRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler(_request, response) {
+    response.status(429).json({ error: { code: 'too_many_pdf_extractions' } })
+  },
+})
+const pdfBodyParser = express.raw({
+  type: 'application/pdf',
+  limit: '15mb',
+})
 
 function mapMeasurement(row: PrismaMeasurement): Measurement {
   return {
@@ -48,6 +64,39 @@ async function findReport(id: string): Promise<Report | null> {
 
   return row ? mapReport(row) : null
 }
+
+router.post(
+  '/extract',
+  requireAuthentication,
+  pdfUploadRateLimit,
+  pdfBodyParser,
+  async (request, response, next) => {
+    const contentType = request.get('content-type')?.split(';', 1)[0]?.trim()
+    if (contentType?.toLowerCase() !== 'application/pdf') {
+      response.status(415).json({
+        error: {
+          code: 'unsupported_media_type',
+          message: 'Send a PDF as the raw request body.',
+        },
+      })
+      return
+    }
+    if (!Buffer.isBuffer(request.body)) {
+      response.status(400).json({ error: { code: 'empty_pdf' } })
+      return
+    }
+
+    try {
+      response.json({ data: await extractPdfReport(request.body) })
+    } catch (error) {
+      if (error instanceof PdfExtractionError) {
+        response.status(error.status).json({ error: { code: error.code } })
+        return
+      }
+      next(error)
+    }
+  },
+)
 
 router.get('/', async (_request, response) => {
   const rows = await prisma.report.findMany({

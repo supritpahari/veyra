@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Veyra PDF extractor tester</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #1e293b;
+        background: #f5f7f6;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 32px 16px; }
+      main { width: min(900px, 100%); margin: 0 auto; }
+      h1 { margin: 0 0 8px; font-size: 1.8rem; }
+      h2 { margin: 0 0 14px; font-size: 1.05rem; }
+      p { line-height: 1.55; }
+      .intro { color: #526174; margin: 0 0 24px; }
+      .card { padding: 20px; margin: 16px 0; border: 1px solid #dbe3e8; border-radius: 12px; background: white; }
+      .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      label { display: block; font-size: .9rem; font-weight: 600; }
+      input, select, button { font: inherit; }
+      input, select { width: 100%; margin-top: 6px; padding: 10px 11px; border: 1px solid #cbd5e1; border-radius: 7px; background: white; }
+      input[type="file"] { padding: 8px; }
+      button { padding: 10px 15px; border: 0; border-radius: 7px; background: #087f70; color: white; font-weight: 650; cursor: pointer; }
+      button.secondary { border: 1px solid #cbd5e1; background: white; color: #263746; }
+      button:disabled { cursor: not-allowed; opacity: .55; }
+      .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+      .hint, #status { color: #526174; font-size: .88rem; }
+      #status { min-height: 1.4em; margin: 14px 0 0; }
+      #status.error { color: #b42318; }
+      #status.success { color: #087f70; }
+      .warning { padding: 12px 14px; border-left: 3px solid #d89420; background: #fff8e8; color: #674b18; font-size: .9rem; }
+      .table-wrap { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+      th, td { padding: 9px 8px; border-bottom: 1px solid #e5eaf0; text-align: left; vertical-align: top; }
+      th { color: #526174; font-size: .8rem; }
+      td.evidence { min-width: 210px; }
+      pre { overflow: auto; max-height: 420px; padding: 14px; border-radius: 8px; background: #f1f5f7; font-size: .82rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+      [hidden] { display: none !important; }
+      @media (max-width: 600px) {
+        body { padding: 22px 12px; }
+        .grid { grid-template-columns: 1fr; }
+        .card { padding: 16px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Veyra PDF extractor</h1>
+      <p class="intro">Sign in, choose a PDF, and view the structured extraction returned by your local Veyra API.</p>
+
+      <p class="warning">Use only synthetic or de-identified PDFs. Extraction results are a draft, are not saved, and must be checked against the original document.</p>
+
+      <section class="card" aria-labelledby="connection-title">
+        <h2 id="connection-title">API and session</h2>
+        <div class="grid">
+          <label for="apiBase">API base URL
+            <input id="apiBase" type="url" value="http://localhost:3000/api/v1" autocomplete="url">
+          </label>
+          <label for="authMode">Account action
+            <select id="authMode">
+              <option value="login">Sign in</option>
+              <option value="register">Create account</option>
+            </select>
+          </label>
+          <label for="email">Email
+            <input id="email" type="email" autocomplete="username" required>
+          </label>
+          <label for="password">Password
+            <input id="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required>
+          </label>
+        </div>
+        <div class="actions">
+          <button id="authButton" type="button">Sign in</button>
+          <button id="logoutButton" class="secondary" type="button">Sign out</button>
+        </div>
+        <p class="hint">The session is held in HttpOnly cookies; this page does not read or store authentication tokens. Keep the page and API hostnames the same (both <code>localhost</code> or both <code>127.0.0.1</code>) so the browser sends the session cookie.</p>
+      </section>
+
+      <section class="card" aria-labelledby="upload-title">
+        <h2 id="upload-title">Choose a PDF</h2>
+        <label for="pdfFile">PDF report
+          <input id="pdfFile" type="file" accept="application/pdf,.pdf">
+        </label>
+        <p id="fileInfo" class="hint">Maximum size: 15 MiB. Maximum length: 25 pages.</p>
+        <button id="extractButton" type="button" disabled>Extract measurements</button>
+      </section>
+
+      <p id="status" role="status" aria-live="polite"></p>
+
+      <section id="results" class="card" aria-labelledby="results-title" hidden>
+        <div class="actions" style="justify-content:space-between;align-items:center;margin-top:0">
+          <h2 id="results-title">Extraction result</h2>
+          <button id="downloadButton" class="secondary" type="button">Download JSON</button>
+        </div>
+        <p id="documentInfo" class="hint"></p>
+        <div id="qualityIssues"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Test</th>
+                <th>Value</th>
+                <th>Unit</th>
+                <th>Reference</th>
+                <th>Page</th>
+                <th>Review</th>
+                <th>Source text</th>
+              </tr>
+            </thead>
+            <tbody id="measurements"></tbody>
+          </table>
+        </div>
+        <details style="margin-top:16px">
+          <summary>View raw JSON</summary>
+          <pre id="rawJson"></pre>
+        </details>
+      </section>
+    </main>
+
+    <script>
+      const apiBase = document.querySelector('#apiBase')
+      const authMode = document.querySelector('#authMode')
+      const email = document.querySelector('#email')
+      const password = document.querySelector('#password')
+      const authButton = document.querySelector('#authButton')
+      const logoutButton = document.querySelector('#logoutButton')
+      const pdfFile = document.querySelector('#pdfFile')
+      const fileInfo = document.querySelector('#fileInfo')
+      const extractButton = document.querySelector('#extractButton')
+      const status = document.querySelector('#status')
+      const results = document.querySelector('#results')
+      const measurements = document.querySelector('#measurements')
+      const qualityIssues = document.querySelector('#qualityIssues')
+      const rawJson = document.querySelector('#rawJson')
+      let lastResult = null
+
+      apiBase.value = `${window.location.protocol}//${window.location.hostname || 'localhost'}:3000/api/v1`
+
+      function baseUrl() {
+        return apiBase.value.trim().replace(/\/+$/, '')
+      }
+
+      function showStatus(message, kind = '') {
+        status.textContent = message
+        status.className = kind
+      }
+
+      async function readResponse(response) {
+        const body = await response.json().catch(() => null)
+        if (!response.ok) {
+          const code = body?.error?.code || `http_${response.status}`
+          throw new Error(`${code}${body?.error?.message ? `: ${body.error.message}` : ''}`)
+        }
+        return body
+      }
+
+      authMode.addEventListener('change', () => {
+        const registering = authMode.value === 'register'
+        authButton.textContent = registering ? 'Create account' : 'Sign in'
+        password.autocomplete = registering ? 'new-password' : 'current-password'
+      })
+
+      authButton.addEventListener('click', async () => {
+        if (!email.reportValidity() || !password.reportValidity()) return
+        authButton.disabled = true
+        showStatus('Authenticating…')
+        try {
+          await fetch(`${baseUrl()}/auth/${authMode.value}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email.value, password: password.value }),
+          }).then(readResponse)
+          const currentSession = await fetch(`${baseUrl()}/auth/me`, {
+            credentials: 'include',
+          }).then(readResponse)
+          password.value = ''
+          showStatus(`Signed in as ${currentSession.data.user.email}. You can upload a PDF.`, 'success')
+          updateExtractButton()
+        } catch (error) {
+          showStatus(`Sign-in failed: ${error.message}`, 'error')
+        } finally {
+          authButton.disabled = false
+        }
+      })
+
+      logoutButton.addEventListener('click', async () => {
+        logoutButton.disabled = true
+        try {
+          const response = await fetch(`${baseUrl()}/auth/logout`, {
+            method: 'POST',
+            credentials: 'include',
+          })
+          if (!response.ok && response.status !== 401) await readResponse(response)
+          showStatus('Signed out.', 'success')
+        } catch (error) {
+          showStatus(`Sign-out failed: ${error.message}`, 'error')
+        } finally {
+          logoutButton.disabled = false
+          updateExtractButton()
+        }
+      })
+
+      function updateExtractButton() {
+        const file = pdfFile.files[0]
+        const validFile = file &&
+          (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) &&
+          file.size > 0 &&
+          file.size <= 15 * 1024 * 1024
+        extractButton.disabled = !validFile
+        if (!file) {
+          fileInfo.textContent = 'Maximum size: 15 MiB. Maximum length: 25 pages.'
+        } else if (!validFile) {
+          fileInfo.textContent = file.size > 15 * 1024 * 1024
+            ? 'This file exceeds the 15 MiB size limit.'
+            : 'Choose a non-empty PDF file.'
+        } else {
+          fileInfo.textContent = `${file.name} — ${(file.size / 1024 / 1024).toFixed(2)} MiB`
+        }
+      }
+
+      pdfFile.addEventListener('change', updateExtractButton)
+
+      function addCell(row, value, className = '') {
+        const cell = document.createElement('td')
+        cell.textContent = value
+        if (className) cell.className = className
+        row.append(cell)
+      }
+
+      function renderResult(result) {
+        lastResult = result
+        measurements.replaceChildren()
+        qualityIssues.replaceChildren()
+
+        document.querySelector('#documentInfo').textContent =
+          `${result.document.pageCount} page(s); OCR used on page(s): ${result.document.ocrPages.join(', ') || 'none'}; ${result.measurements.length} measurement(s) found.`
+
+        for (const measurement of result.measurements) {
+          const row = document.createElement('tr')
+          addCell(row, measurement.testName)
+          addCell(row, String(measurement.value))
+          addCell(row, measurement.unit || 'Missing')
+          addCell(row, measurement.referenceRangeText ||
+            (measurement.referenceLow !== null || measurement.referenceHigh !== null
+              ? `${measurement.referenceLow ?? '—'} to ${measurement.referenceHigh ?? '—'}`
+              : 'Missing'))
+          addCell(row, String(measurement.page))
+          addCell(row, measurement.reviewStatus)
+          addCell(row, measurement.sourceText, 'evidence')
+          measurements.append(row)
+        }
+
+        if (result.qualityIssues.length) {
+          const heading = document.createElement('h3')
+          heading.textContent = 'Needs attention'
+          qualityIssues.append(heading)
+          const list = document.createElement('ul')
+          for (const issue of result.qualityIssues) {
+            const item = document.createElement('li')
+            item.textContent = `${issue.message}${issue.page ? ` (page ${issue.page})` : ''}`
+            list.append(item)
+          }
+          qualityIssues.append(list)
+        }
+
+        rawJson.textContent = JSON.stringify(result, null, 2)
+        results.hidden = false
+      }
+
+      extractButton.addEventListener('click', async () => {
+        const file = pdfFile.files[0]
+        if (!file) return
+        extractButton.disabled = true
+        showStatus('Extracting PDF. Scanned pages may take a little longer…')
+        try {
+          const response = await fetch(`${baseUrl()}/reports/extract`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/pdf' },
+            body: file,
+          })
+          const body = await readResponse(response)
+          renderResult(body.data)
+          showStatus('Extraction complete. Review every result against the PDF.', 'success')
+        } catch (error) {
+          const hint = error.message.includes('authentication_required') ||
+            error.message.includes('invalid_access')
+            ? ' The browser did not send a valid session cookie. Use the same hostname for this page and the API, then sign in again.'
+            : error instanceof TypeError
+              ? ' Check that the API is running and its CORS_ORIGIN includes this page origin.'
+              : ''
+          showStatus(`Extraction failed: ${error.message}.${hint}`, 'error')
+        } finally {
+          updateExtractButton()
+        }
+      })
+
+      document.querySelector('#downloadButton').addEventListener('click', () => {
+        if (!lastResult) return
+        const url = URL.createObjectURL(new Blob(
+          [JSON.stringify(lastResult, null, 2)],
+          { type: 'application/json' },
+        ))
+        const link = document.createElement('a')
+        link.href = url
+        link.download = 'veyra-pdf-extraction.json'
+        link.click()
+        URL.revokeObjectURL(url)
+      })
+    </script>
+  </body>
+</html>

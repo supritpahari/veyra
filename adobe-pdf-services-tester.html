@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adobe PDF Services API tester</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+tailwind.config = {
+  darkMode: 'media',
+  theme: { extend: { fontFamily: {
+    sans: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+    mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'] } } }
+}
+</script>
+<style>
+  body { background: #f4f6f5; color: #1b2530; }
+  @media (prefers-color-scheme: dark) { body { background: #12181d; color: #dbe3e8; } }
+  :focus-visible { outline: 2px solid #0f8a79; outline-offset: 2px; }
+</style>
+</head>
+<body class="font-sans antialiased min-h-screen">
+<main class="max-w-6xl mx-auto px-4 py-8">
+
+  <header class="mb-6">
+    <h1 class="text-2xl font-semibold">Adobe PDF Services API tester</h1>
+    <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">
+      Runs the full flow for Extract PDF or PDF to Markdown: get a token, upload a PDF, start the operation, poll the job, and download the result.
+    </p>
+  </header>
+
+  <div class="grid lg:grid-cols-[22rem_1fr] gap-6">
+
+    <!-- LEFT: inputs -->
+    <section class="space-y-5">
+
+      <form id="creds" autocomplete="off" onsubmit="return false" class="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 space-y-3">
+        <h2 class="font-semibold">Credentials</h2>
+        <label class="block text-sm">Client ID (x-api-key)
+          <input id="clientId" type="text" autocomplete="off" spellcheck="false" class="mt-1 w-full rounded border border-slate-300 dark:border-slate-600 bg-transparent px-2 py-1.5 font-mono text-sm">
+        </label>
+        <label class="block text-sm">Client secret
+          <input id="clientSecret" type="password" autocomplete="new-password" spellcheck="false" class="mt-1 w-full rounded border border-slate-300 dark:border-slate-600 bg-transparent px-2 py-1.5 font-mono text-sm">
+        </label>
+        <p class="text-xs text-slate-500 dark:text-slate-400 text-center">or use a token you already have</p>
+        <label class="block text-sm">Access token
+          <input id="manualToken" type="password" autocomplete="new-password" spellcheck="false" class="mt-1 w-full rounded border border-slate-300 dark:border-slate-600 bg-transparent px-2 py-1.5 font-mono text-sm">
+        </label>
+        <label class="block text-sm">Proxy base URL (optional)
+          <input id="proxy" type="url" placeholder="http://localhost:8787" spellcheck="false" class="mt-1 w-full rounded border border-slate-300 dark:border-slate-600 bg-transparent px-2 py-1.5 font-mono text-sm">
+        </label>
+        <label class="flex items-center gap-2 text-sm"><input id="remember" type="checkbox"> Remember client ID for this tab</label>
+        <div class="flex items-center justify-between">
+          <button id="clearBtn" type="button" class="text-sm text-red-700 dark:text-red-400 underline">Clear all credentials</button>
+        </div>
+        <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1 list-disc pl-4">
+          <li>The secret and token stay in memory only. They are never written to storage.</li>
+          <li>The secret field is wiped as soon as a token is issued.</li>
+          <li>Secrets and tokens are masked in the log.</li>
+        </ul>
+      </form>
+
+      <div class="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 space-y-3">
+        <h2 class="font-semibold">Operation</h2>
+        <select id="op" class="w-full rounded border border-slate-300 dark:border-slate-600 bg-transparent px-2 py-1.5 text-sm">
+          <option value="extract" class="text-black">Extract PDF (structured data)</option>
+          <option value="markdown" class="text-black">PDF to Markdown</option>
+        </select>
+        <fieldset id="extractOpts" class="space-y-1.5 text-sm">
+          <legend class="mb-1">Elements to extract</legend>
+          <label class="flex items-center gap-2"><input id="eText" type="checkbox" checked> Text</label>
+          <label class="flex items-center gap-2"><input id="eTables" type="checkbox"> Tables</label>
+          <label class="flex items-center gap-2"><input id="rTables" type="checkbox"> Save table images</label>
+          <label class="flex items-center gap-2"><input id="rFigures" type="checkbox"> Save figure images</label>
+          <label class="flex items-center gap-2"><input id="styling" type="checkbox"> Include text styling</label>
+          <label class="block">Table export format
+            <select id="tableFmt" class="mt-1 w-full rounded border border-slate-300 dark:border-slate-600 bg-transparent px-2 py-1.5 text-sm">
+              <option value="" class="text-black">None</option>
+              <option value="csv" class="text-black">CSV</option>
+              <option value="xlsx" class="text-black">XLSX</option>
+            </select>
+          </label>
+        </fieldset>
+      </div>
+
+      <div class="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 space-y-3">
+        <h2 class="font-semibold">PDF file</h2>
+        <input id="file" type="file" accept="application/pdf,.pdf" class="block w-full text-sm file:mr-3 file:rounded file:border-0 file:bg-teal-700 file:text-white file:px-3 file:py-1.5 file:cursor-pointer">
+        <p id="fileInfo" class="text-xs text-slate-500 dark:text-slate-400">No file selected.</p>
+      </div>
+
+      <div class="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-semibold">Workflow</h2>
+          <button id="runAll" class="rounded bg-teal-700 hover:bg-teal-800 text-white text-sm font-medium px-3 py-1.5">Run full workflow</button>
+        </div>
+        <ol id="steps" class="space-y-2 text-sm"></ol>
+      </div>
+    </section>
+
+    <!-- RIGHT: output -->
+    <section class="space-y-5 min-w-0">
+
+      <div class="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <h2 class="font-semibold">Result</h2>
+          <div class="flex gap-2">
+            <button id="copyMd" class="text-sm rounded border border-slate-300 dark:border-slate-600 px-2.5 py-1 disabled:opacity-40" disabled>Copy</button>
+            <button id="dlMd" class="text-sm rounded border border-slate-300 dark:border-slate-600 px-2.5 py-1 disabled:opacity-40" disabled>Download</button>
+          </div>
+        </div>
+        <p id="resultNote" class="text-xs text-slate-500 dark:text-slate-400 mb-2 hidden"></p>
+        <pre id="md" class="font-mono text-sm whitespace-pre-wrap break-words max-h-[26rem] overflow-auto rounded bg-slate-100 dark:bg-slate-800 p-3 min-h-[8rem]">Run the workflow to see the result here.</pre>
+      </div>
+
+      <div class="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="font-semibold">Request log</h2>
+          <button id="clearLog" class="text-sm underline">Clear log</button>
+        </div>
+        <div id="log" class="font-mono text-xs space-y-1 max-h-72 overflow-auto"></div>
+      </div>
+
+      <details class="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 text-sm">
+        <summary class="font-semibold cursor-pointer">Requests failing with “Failed to fetch”? Use a proxy.</summary>
+        <p class="mt-2 text-slate-600 dark:text-slate-400">Adobe’s API does not send CORS headers, so browsers block direct calls, and the job’s Location header is hidden from scripts. A small local proxy fixes both and keeps your calls off third-party servers. Save this as <code class="font-mono">proxy.mjs</code>, run <code class="font-mono">node proxy.mjs</code> (Node 18+), then enter <code class="font-mono">http://localhost:8787</code> above. Limit the allowed origin before using it anywhere but your own machine.</p>
+        <pre class="mt-2 font-mono text-xs overflow-auto rounded bg-slate-100 dark:bg-slate-800 p-3">import http from 'node:http';
+const cors = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': '*',
+  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+  'Access-Control-Expose-Headers': 'Location,x-request-id'
+};
+http.createServer(async (req, res) => {
+  if (req.method === 'OPTIONS') { res.writeHead(204, cors); return res.end(); }
+  const chunks = []; for await (const c of req) chunks.push(c);
+  const h = {};
+  for (const k of ['content-type', 'authorization', 'x-api-key'])
+    if (req.headers[k]) h[k] = req.headers[k];
+  const r = await fetch('https://pdf-services.adobe.io' + req.url, {
+    method: req.method, headers: h,
+    body: chunks.length ? Buffer.concat(chunks) : undefined });
+  const out = { ...cors, 'content-type': r.headers.get('content-type') || 'application/json' };
+  const loc = r.headers.get('location'); if (loc) out.Location = loc;
+  res.writeHead(r.status, out);
+  res.end(Buffer.from(await r.arrayBuffer()));
+}).listen(8787, () => console.log('Proxy on http://localhost:8787'));</pre>
+      </details>
+    </section>
+  </div>
+</main>
+
+<script>
+const ADOBE = 'https://pdf-services.adobe.io';
+const $ = id => document.getElementById(id);
+const S = { token: null, expires: 0, assetID: null, uploadUri: null, pollUrl: null, downloadUri: null, blob: null, md: '' };
+
+/* ---------- helpers ---------- */
+const base = () => $('proxy').value.trim().replace(/\/+$/, '') || ADOBE;
+const route = u => u.startsWith(ADOBE) ? base() + u.slice(ADOBE.length) : u;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const secrets = () => [$('clientSecret').value, $('manualToken').value, S.token].filter(s => s && s.length > 6);
+const mask = t => secrets().reduce((s, v) => s.split(v).join('••••••••'), String(t));
+
+function log(msg, kind = 'info') {
+  const colors = { info: '', ok: 'text-teal-700 dark:text-teal-400', err: 'text-red-700 dark:text-red-400', warn: 'text-amber-700 dark:text-amber-400' };
+  const row = document.createElement('div');
+  row.className = 'break-words ' + colors[kind];
+  row.textContent = new Date().toLocaleTimeString() + '  ' + mask(msg);
+  $('log').prepend(row);
+}
+
+function authHeaders(json = true) {
+  const h = { 'x-api-key': $('clientId').value.trim(), 'Authorization': 'Bearer ' + S.token };
+  if (json) h['Content-Type'] = 'application/json';
+  return h;
+}
+
+async function call(method, url, opts = {}) {
+  log(`${method} ${url}`);
+  let res;
+  try { res = await fetch(url, { method, ...opts }); }
+  catch (e) {
+    throw new Error('Network or CORS error. The browser blocked this request. Run the proxy shown below and set the Proxy base URL.');
+  }
+  log(`← ${res.status} ${res.statusText}`, res.ok ? 'ok' : 'err');
+  return res;
+}
+
+async function failIfBad(res, what) {
+  if (res.ok) return;
+  let detail = '';
+  try { detail = mask(await res.text()).slice(0, 400); } catch {}
+  throw new Error(`${what} failed (${res.status}). ${detail}`);
+}
+
+function findKey(o, key) {
+  if (!o || typeof o !== 'object') return null;
+  if (o[key]) return o[key];
+  for (const k in o) { const f = findKey(o[k], key); if (f) return f; }
+  return null;
+}
+
+/* ---------- workflow steps ---------- */
+const STEPS = [
+  { id: 'token', label: 'Get access token', fn: stepToken },
+  { id: 'upload', label: 'Upload PDF asset', fn: stepUpload },
+  { id: 'convert', label: 'Start operation', fn: stepConvert },
+  { id: 'poll', label: 'Wait for job to finish', fn: stepPoll },
+  { id: 'fetch', label: 'Retrieve result', fn: stepFetch },
+];
+
+async function stepToken() {
+  const manual = $('manualToken').value.trim();
+  if (manual) { S.token = manual; S.expires = Date.now() + 3600e3; log('Using the access token you provided.', 'warn'); return; }
+  if (S.token && Date.now() < S.expires - 60e3) { log('Reusing the current token.'); return; }
+  const id = $('clientId').value.trim(), secret = $('clientSecret').value;
+  if (!id || !secret) throw new Error('Enter a client ID and secret, or paste an access token.');
+  const res = await call('POST', route(ADOBE + '/token'), {
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ client_id: id, client_secret: secret })
+  });
+  await failIfBad(res, 'Token request');
+  const j = await res.json();
+  S.token = j.access_token;
+  S.expires = Date.now() + (j.expires_in ? j.expires_in * 1000 : 3600e3);
+  $('clientSecret').value = '';
+  log('Token issued. The client secret field has been cleared.', 'ok');
+}
+
+async function stepUpload() {
+  const file = $('file').files[0];
+  if (!file) throw new Error('Choose a PDF file first.');
+  if (!S.token) await stepToken();
+  const r1 = await call('POST', route(ADOBE + '/assets'), {
+    headers: authHeaders(), body: JSON.stringify({ mediaType: 'application/pdf' })
+  });
+  await failIfBad(r1, 'Asset creation');
+  const j = await r1.json();
+  S.assetID = j.assetID; S.uploadUri = j.uploadUri;
+  log('Asset created: ' + S.assetID);
+  const r2 = await call('PUT', S.uploadUri, { headers: { 'Content-Type': 'application/pdf' }, body: file });
+  await failIfBad(r2, 'File upload');
+  log('Upload complete.', 'ok');
+}
+
+async function stepConvert() {
+  if (!S.assetID) throw new Error('Upload a PDF first.');
+  if (!S.token) await stepToken();
+  const body = { assetID: S.assetID };
+  let path = '/operation/pdftomarkdown';
+  if ($('op').value === 'extract') {
+    path = '/operation/extractpdf';
+    body.elementsToExtract = [$('eText').checked && 'text', $('eTables').checked && 'tables'].filter(Boolean);
+    if (!body.elementsToExtract.length) throw new Error('Select at least one element to extract (text or tables).');
+    const rend = [$('rTables').checked && 'tables', $('rFigures').checked && 'figures'].filter(Boolean);
+    if (rend.length) body.elementsToExtractRenditions = rend;
+    if ($('styling').checked) body.includeStyling = true;
+    if ($('tableFmt').value) body.tableOutputFormat = $('tableFmt').value;
+  }
+  log('Request body: ' + JSON.stringify(body));
+  const res = await call('POST', route(ADOBE + path), {
+    headers: authHeaders(), body: JSON.stringify(body)
+  });
+  await failIfBad(res, 'Conversion request');
+  S.pollUrl = res.headers.get('location');
+  if (!S.pollUrl) throw new Error('No Location header returned. Browsers hide it without CORS exposure. Use the proxy.');
+  log('Job started. Poll URL received.', 'ok');
+}
+
+async function stepPoll() {
+  if (!S.pollUrl) throw new Error('Start the conversion first.');
+  if (!S.token) await stepToken();
+  for (let i = 1; i <= 60; i++) {
+    const res = await call('GET', route(S.pollUrl), { headers: authHeaders(false) });
+    await failIfBad(res, 'Status check');
+    const j = await res.json();
+    log(`Job status: ${j.status} (check ${i})`);
+    if (j.status === 'done') {
+      S.downloadUri = (j.content && j.content.downloadUri) || findKey(j, 'downloadUri');
+      if (!S.downloadUri) throw new Error('Job finished but no download link was in the response.');
+      log('Job done.', 'ok'); return;
+    }
+    if (j.status === 'failed') throw new Error('Adobe reported the job failed: ' + JSON.stringify(j.error || j).slice(0, 300));
+    await sleep(2000);
+  }
+  throw new Error('Timed out after 2 minutes of polling.');
+}
+
+async function stepFetch() {
+  if (!S.downloadUri) throw new Error('No download link yet. Finish the job first.');
+  let res;
+  try { res = await call('GET', S.downloadUri); await failIfBad(res, 'Download'); }
+  catch (e) {
+    showNote(`The browser could not download the result directly. <a class="underline" target="_blank" rel="noopener" href="${S.downloadUri}">Open the download link</a> (it expires, so use it soon).`, true);
+    throw e;
+  }
+  const buf = await res.arrayBuffer();
+  const head = new Uint8Array(buf.slice(0, 2));
+  S.blob = new Blob([buf]);
+  S.isZip = head[0] === 0x50 && head[1] === 0x4b;      // "PK": zip
+  const LIMIT = 200000;
+  const show = (t, note) => {
+    $('md').textContent = t.length > LIMIT ? t.slice(0, LIMIT) + '\n\n… truncated for display. Copy or Download for the full result.' : t;
+    showNote(note);
+  };
+  if (S.isZip) {
+    if (typeof JSZip === 'undefined') {
+      S.md = '';
+      show('The result is a ZIP archive. The unzip library did not load, so use Download to save it.', 'Result type: ZIP archive.');
+    } else {
+      const zip = await JSZip.loadAsync(buf);
+      const names = Object.keys(zip.files).filter(n => !zip.files[n].dir);
+      const jsonName = names.find(n => /structuredData\.json$/i.test(n)) || names.find(n => /\.json$/i.test(n));
+      const mdName = names.find(n => /\.md$/i.test(n));
+      const main = jsonName || mdName;
+      S.md = main ? await zip.files[main].async('string') : '';
+      if (jsonName) { try { S.md = JSON.stringify(JSON.parse(S.md), null, 2); } catch {} }
+      show(S.md || 'No JSON or Markdown file found in the archive.',
+        `ZIP archive with ${names.length} file(s). Showing ${main || 'nothing'}. Files: ${names.slice(0, 12).join(', ')}${names.length > 12 ? ', …' : ''}`);
+    }
+  } else {
+    S.md = new TextDecoder().decode(buf);
+    try { if (/json/i.test(res.headers.get('content-type') || '') || /^\s*[{[]/.test(S.md)) S.md = JSON.stringify(JSON.parse(S.md), null, 2); } catch {}
+    show(S.md || '(empty result)', `Result: ${S.md.length.toLocaleString()} characters.`);
+  }
+  $('copyMd').disabled = !S.md; $('dlMd').disabled = false;
+  log('Result retrieved.', 'ok');
+}
+
+function showNote(html, warn) {
+  const n = $('resultNote'); n.innerHTML = html; n.classList.remove('hidden');
+}
+
+/* ---------- step UI ---------- */
+const BADGE = {
+  idle: ['bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200', 'Ready'],
+  run: ['bg-amber-200 text-amber-900', 'Running'],
+  ok: ['bg-teal-200 text-teal-900', 'Done'],
+  err: ['bg-red-200 text-red-900', 'Failed'],
+};
+function setStep(id, state) {
+  const b = $('badge-' + id);
+  b.className = 'text-xs rounded px-1.5 py-0.5 ' + BADGE[state][0];
+  b.textContent = BADGE[state][1];
+}
+STEPS.forEach((s, i) => {
+  const li = document.createElement('li');
+  li.className = 'flex items-center gap-2';
+  li.innerHTML = `<span class="w-5 text-slate-500">${i + 1}.</span>
+    <span class="flex-1">${s.label}</span>
+    <span id="badge-${s.id}"></span>
+    <button data-step="${s.id}" class="text-xs rounded border border-slate-300 dark:border-slate-600 px-2 py-1">Run</button>`;
+  $('steps').appendChild(li);
+  setStep(s.id, 'idle');
+});
+
+let busy = false;
+async function runStep(s) {
+  setStep(s.id, 'run');
+  try { await s.fn(); setStep(s.id, 'ok'); return true; }
+  catch (e) { setStep(s.id, 'err'); log(e.message, 'err'); return false; }
+}
+async function guarded(fn) {
+  if (busy) return; busy = true;
+  document.querySelectorAll('button').forEach(b => b.dataset.was = b.disabled);
+  try { await fn(); } finally { busy = false; }
+}
+
+$('steps').addEventListener('click', e => {
+  const id = e.target.dataset.step; if (!id) return;
+  guarded(() => runStep(STEPS.find(s => s.id === id)));
+});
+$('runAll').addEventListener('click', () => guarded(async () => {
+  STEPS.forEach(s => setStep(s.id, 'idle'));
+  $('md').textContent = 'Working…'; $('resultNote').classList.add('hidden');
+  S.assetID = S.pollUrl = S.downloadUri = null;
+  for (const s of STEPS) { if (!(await runStep(s))) { $('md').textContent = 'The workflow stopped. See the log for details.'; return; } }
+}));
+
+/* ---------- results, file, credentials ---------- */
+$('copyMd').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(S.md); log('Markdown copied to clipboard.', 'ok'); }
+  catch { log('Copy was blocked by the browser. Select the text manually.', 'warn'); }
+});
+$('dlMd').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(S.blob);
+  const name = ($('file').files[0]?.name || 'converted').replace(/\.pdf$/i, '');
+  a.download = name + (S.isZip ? '.zip' : ($('op').value === 'extract' ? '.json' : '.md'));
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+$('file').addEventListener('change', () => {
+  const f = $('file').files[0];
+  $('fileInfo').textContent = f ? `${f.name}, ${(f.size / 1024).toFixed(1)} KB` : 'No file selected.';
+  S.assetID = null;
+});
+$('clearLog').addEventListener('click', () => $('log').replaceChildren());
+
+function clearCreds() {
+  ['clientId', 'clientSecret', 'manualToken'].forEach(id => $(id).value = '');
+  S.token = null; S.expires = 0;
+  try { sessionStorage.removeItem('adobe_client_id'); } catch {}
+  $('remember').checked = false;
+  log('Credentials cleared from memory and session storage.', 'ok');
+}
+$('clearBtn').addEventListener('click', clearCreds);
+
+// Only the (non-secret) client ID may be kept, and only for this tab.
+try {
+  const saved = sessionStorage.getItem('adobe_client_id');
+  if (saved) { $('clientId').value = saved; $('remember').checked = true; }
+} catch {}
+$('remember').addEventListener('change', () => {
+  try {
+    if ($('remember').checked) sessionStorage.setItem('adobe_client_id', $('clientId').value.trim());
+    else sessionStorage.removeItem('adobe_client_id');
+  } catch {}
+});
+$('clientId').addEventListener('input', () => {
+  if ($('remember').checked) try { sessionStorage.setItem('adobe_client_id', $('clientId').value.trim()); } catch {}
+});
+const syncOp = () => { $('extractOpts').classList.toggle('hidden', $('op').value !== 'extract'); };
+$('op').addEventListener('change', () => { syncOp(); S.pollUrl = S.downloadUri = null; });
+syncOp();
+window.addEventListener('pagehide', () => { $('clientSecret').value = ''; $('manualToken').value = ''; });
+</script>
+</body>
+</html>

@@ -42,7 +42,7 @@ app.use((_request, response) => {
   response.status(404).json({ error: { code: 'route_not_found' } })
 })
 
-const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
+const errorHandler: ErrorRequestHandler = (error, request, response, _next) => {
   if (
     typeof error === 'object' &&
     error !== null &&
@@ -50,6 +50,22 @@ const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => 
     error.type === 'entity.parse.failed'
   ) {
     response.status(400).json({ error: { code: 'invalid_json' } })
+    return
+  }
+
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'type' in error &&
+    error.type === 'entity.too.large'
+  ) {
+    response.status(413).json({
+      error: {
+        code: request.path === '/api/v1/reports/extract'
+          ? 'pdf_too_large'
+          : 'request_body_too_large',
+      },
+    })
     return
   }
 
